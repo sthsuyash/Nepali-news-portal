@@ -1,4 +1,4 @@
-/* General layout */
+
 body {
   margin: 0;
   padding: 0;
@@ -45,7 +45,7 @@ h2 {
 }
 
 .input-field input {
-  width: 100%;
+  width: 93%;
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 5px;
