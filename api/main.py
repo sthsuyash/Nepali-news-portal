@@ -62,6 +62,10 @@ SECRET_KEY = "your_secret_key"  # Change this to a random secret key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# Hardcoded admin credentials
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "adminpassword"
+
 # Pydantic model for request validation
 class UserRegister(BaseModel):
     username: str
@@ -79,7 +83,7 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
-# In-memory storage for session tokens (for demonstration purposes)
+# In-memory storage for session tokens
 active_sessions = {}
 
 # Token generation function
@@ -98,9 +102,10 @@ def get_current_user(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
-        if username is None:
+        role = payload.get("role")
+        if username is None or role is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        return username
+        return {"username": username, "role": role}
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
@@ -124,6 +129,15 @@ async def register(user: UserRegister):
 
 @app.post("/login")
 async def login(user: UserLogin):
+   # Check for hardcoded admin credentials
+    if user.username == ADMIN_USERNAME and user.password == ADMIN_PASSWORD:
+        # Create access token for admin with role "admin"
+        access_token = create_access_token(data={"sub": user.username, "role": "admin"})
+        active_sessions[access_token] = user.username  # Store the active session
+
+        return {"access_token": access_token, "token_type": "bearer", "message": "Welcome Admin!"}
+
+    # Check in database for normal users
     query = users.select().where(users.c.username == user.username)
     existing_user = await database.fetch_one(query)
     
@@ -139,8 +153,11 @@ async def login(user: UserLogin):
 @app.get("/dashboard")
 async def read_dashboard(token: str):
     current_user = get_current_user(token)  # Verify token and get user
+    if current_user['role'] != "user":  # Only allow access to users, not admins
+        raise HTTPException(status_code=403, detail="Access denied")
+    
     # Fetch user data from the database
-    query = users.select().where(users.c.username == current_user)
+    query = users.select().where(users.c.username == current_user['username'])
     user_data = await database.fetch_one(query)
 
     if user_data is None:
@@ -155,6 +172,14 @@ async def read_dashboard(token: str):
             # You can include other fields as needed
         }
     }
+@app.get("/admin-dashboard")
+async def read_admin_dashboard(token: str):
+    current_user = get_current_user(token)
+    # Verify that the current user is the admin
+    if current_user['role'] != "admin":  # Only allow access to admin
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    return {"message": f"Welcome to the Admin Dashboard, {current_user['username']}!"}
 
 @app.post("/logout")
 async def logout(token: str):
