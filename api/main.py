@@ -1,12 +1,13 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, File, HTTPException, Depends, UploadFile, status
 from pydantic import BaseModel, EmailStr, validator
-from sqlalchemy import select
+from sqlalchemy import ForeignKey, null, select
 from databases import Database
 import sqlalchemy
 import logging
 import os
 from datetime import datetime, timedelta
 import jwt  # Use PyJWT for token creation and verification
+import datetime 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +28,20 @@ users = sqlalchemy.Table(
     sqlalchemy.Column("email", sqlalchemy.String(length=100), nullable=False, unique=True),
     sqlalchemy.Column("phone_number", sqlalchemy.String(length=10), nullable=False),
     sqlalchemy.Column("password", sqlalchemy.String(length=100), nullable=False)
+)
+
+# Posts table definition
+posts = sqlalchemy.Table(
+    "posts",
+    metadata,
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True),
+    sqlalchemy.Column("title", sqlalchemy.String(length=100), nullable=False),
+    sqlalchemy.Column("post", sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column("isPublished", sqlalchemy.Boolean, default=False),
+    sqlalchemy.Column("sentiment", sqlalchemy.String(length=20), nullable=True),
+    sqlalchemy.Column("user_id", sqlalchemy.Integer, ForeignKey("users.id")),
+    sqlalchemy.Column("created_date", sqlalchemy.DateTime, default=datetime.datetime.utcnow),  # Automatically set on creation
+    sqlalchemy.Column("updated_date", sqlalchemy.DateTime, nullable=True)  # Set to NULL initially, updated on edit
 )
 
 # Create an engine to use with metadata
@@ -83,13 +98,23 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class PostCreate(BaseModel):
+    title: str
+    post: str
+    isPublished: bool   
+
+class PostUpdate(BaseModel):
+    title: str
+    post: str
+    isPublished: bool     
+
 # In-memory storage for session tokens
 active_sessions = {}
 
 # Token generation function
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -103,9 +128,10 @@ def get_current_user(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         role = payload.get("role")
-        if username is None or role is None:
+        user_id = payload.get("user_id")  # Extract user_id from the payload
+        if username is None or role is None or user_id is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        return {"username": username, "role": role}
+        return {"username": username, "role": role, "user_id": user_id}  # Return user_id here
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
@@ -129,25 +155,22 @@ async def register(user: UserRegister):
 
 @app.post("/login")
 async def login(user: UserLogin):
-   # Check for hardcoded admin credentials
+    # Check for hardcoded admin credentials
     if user.username == ADMIN_USERNAME and user.password == ADMIN_PASSWORD:
-        # Create access token for admin with role "admin"
-        access_token = create_access_token(data={"sub": user.username, "role": "admin"})
-        active_sessions[access_token] = user.username  # Store the active session
-
+        access_token = create_access_token(data={"sub": user.username, "role": "admin", "user_id": -1})  # Admin user_id as -1 or any specific value
+        active_sessions[access_token] = user.username
         return {"access_token": access_token, "token_type": "bearer", "message": "Welcome Admin!"}
 
     # Check in database for normal users
     query = users.select().where(users.c.username == user.username)
     existing_user = await database.fetch_one(query)
-    
-    if not existing_user or existing_user["password"] != user.password:  # Password verification
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
-    # Create access token
-    access_token = create_access_token(data={"sub": user.username})
-    active_sessions[access_token] = user.username  # Store the active session
 
+    if not existing_user or existing_user["password"] != user.password:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    # Create access token with user_id
+    access_token = create_access_token(data={"sub": user.username, "role": "user", "user_id": existing_user["id"]})
+    active_sessions[access_token] = user.username
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/dashboard")
@@ -162,15 +185,24 @@ async def read_dashboard(token: str):
 
     if user_data is None:
         raise HTTPException(status_code=404, detail="User not found")
+    
+     # Fetch posts for this user
+    post_query = posts.select().where(posts.c.user_id == user_data["id"])
+    user_posts = await database.fetch_all(post_query)
+      # Format the posts for display
+    posts_response = [
+        {"title": post["title"], "sentiment": post["sentiment"]}
+        for post in user_posts
+    ]
 
     return {
-        "message": f"Welcome to your dashboard, {current_user}!",
+        "message": f"Welcome to your dashboard, {current_user['username']}!",
         "user_data": {
             "username": user_data["username"],
             "email": user_data["email"],
-            "phone_number": user_data["phone_number"],
-            # You can include other fields as needed
-        }
+            
+        },
+        "posts": posts_response
     }
 @app.get("/admin-dashboard")
 async def read_admin_dashboard(token: str):
@@ -179,7 +211,25 @@ async def read_admin_dashboard(token: str):
     if current_user['role'] != "admin":  # Only allow access to admin
         raise HTTPException(status_code=403, detail="Access denied")
 
-    return {"message": f"Welcome to the Admin Dashboard, {current_user['username']}!"}
+    # Fetch the latest 5 posts from the posts table
+    query = posts.select().order_by(posts.c.id.desc()).limit(5)
+    latest_posts = await database.fetch_all(query)
+
+    # Format the posts for display
+    posts_response = [
+        {
+            "title": post["title"],
+            "post": post["post"],
+            "sentiment": post["sentiment"],
+            "user_id": post["user_id"]
+        }
+        for post in latest_posts
+    ]
+
+    return {
+        "message": f"Welcome to the Admin Dashboard, {current_user['username']}!",
+        "latest_posts": posts_response
+    }
 
 @app.post("/logout")
 async def logout(token: str):
@@ -189,7 +239,86 @@ async def logout(token: str):
     else:
         raise HTTPException(status_code=400, detail="Token not found or already logged out.")
 
+@app.post("/dashboard/post")
+async def create_post(token: str, post_data: PostCreate):
+    current_user = get_current_user(token)  # Verify token and get user
+    if current_user['role'] != "user":
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Fetch user info
+    query = users.select().where(users.c.username == current_user["username"])
+    user = await database.fetch_one(query)
+    
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    
+    # Insert new post into the database
+    insert_query = posts.insert().values(
+        title=post_data.title,
+        post=post_data.post,
+        isPublished=post_data.isPublished,
+        sentiment=null(),
+        user_id=user["id"],
+        created_date=datetime.datetime.now()  # Set created date
+    )
+    await database.execute(insert_query)
 
+    return {"message": "Post created successfully!"}
+
+@app.put("/dashboard/post/{post_id}")
+async def update_post(post_id: int, token: str, post_data: PostUpdate):
+    current_user = get_current_user(token)
+
+    if current_user['role'] != "user":
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Fetch the post to ensure the user is the owner
+    query = posts.select().where(posts.c.id == post_id)
+    existing_post = await database.fetch_one(query)
+
+    if not existing_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    if existing_post["user_id"] != current_user["user_id"]:
+        raise HTTPException(status_code=403, detail="You can only edit your own posts")
+
+    # Update the post in the database
+    update_query = posts.update().where(posts.c.id == post_id).values(
+        title=post_data.title,
+        post=post_data.post,
+        isPublished=post_data.isPublished,
+        sentiment=None,
+        updated_date=datetime.datetime.now()  # This sets the updated date
+    )
+    await database.execute(update_query)
+
+    return {"message": "Post updated successfully!"}
+
+
+
+@app.delete("/dashboard/post/{post_id}")
+async def delete_post(post_id: int, token: str):
+    current_user = get_current_user(token)
+
+    if current_user['role'] != "user":
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Fetch the post to ensure the user is the owner
+    query = posts.select().where(posts.c.id == post_id)
+    existing_post = await database.fetch_one(query)
+
+    if not existing_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    if existing_post["user_id"] != current_user["user_id"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own posts")
+
+    # Delete the post from the database
+    delete_query = posts.delete().where(posts.c.id == post_id)
+    await database.execute(delete_query)
+
+    return {"message": "Post deleted successfully!"}
 @app.get("/")
 async def read_root():
     try:
