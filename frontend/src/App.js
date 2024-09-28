@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import LoginSignup from "./user-auth/auth-form.js";
-import NewsCrud from "./crud-page/postings.js";
+import NewsCrud from "./user-dashboard/dashboard.js";
 
 function App() {
   return (

@@ -10,12 +10,14 @@
 * {
   margin: 0;
   padding: 0;
-  font-family: "Lato", sans-serif;
-
+  font-family: "Euclid Circular A", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  box-sizing:border-box;
+ 
 }
 
 
 body {
-  background-color: #fbfbfd;
+  background-color: rgb(214, 224, 227);
   overflow-y: auto;
 }
