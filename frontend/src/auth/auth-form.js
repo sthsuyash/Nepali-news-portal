@@ -35,7 +35,7 @@ const LoginSignup = () => {
 
     if (isLogin) {
       console.log("Logging Details:", formData);
-      navigate("/news-crud");
+      navigate("/user/dashboard");
     } else {
       if (formData.password !== formData.confirmPassword) {
         alert("Passwords don't match!");
@@ -49,7 +49,7 @@ const LoginSignup = () => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-indigo-900">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-blue-950">
       <div className="bg-white w-full max-w-2xl">
         {" "}
         <div className="text-left ml-8 py-3">
