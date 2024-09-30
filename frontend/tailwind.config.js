@@ -5,7 +5,7 @@ module.exports = {
     fontFamily: {
       sans: ["Inter", "sans-serif"],
       body: ["Montserrat", "sans-serif"],
-      login: ["MongoDB Value Serif", "Times New Roman", "serif"],
+      login: ["Fredoka", "sans-serif"],
     },
     extend: {},
   },
