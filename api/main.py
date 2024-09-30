@@ -6,8 +6,24 @@ from databases import Database
 import sqlalchemy
 import logging
 from datetime import datetime, timedelta
-import jwt  # Use PyJWT for token creation and verification
-import datetime 
+import jwt  # This should be from the PyJWT library
+import datetime
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+
+app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    access_control_allow_origins=["*"],
+    allow_origins=["*"],  # Allow requests from the frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 
 # Define the HTTP Bearer Token security scheme
@@ -17,7 +33,7 @@ bearer_scheme = HTTPBearer()
 logging.basicConfig(level=logging.INFO)
 
 # DATABASE_URL for PostgreSQL running in Docker
-DATABASE_URL = "postgresql://postgres:password@localhost:5432/news"
+DATABASE_URL = "postgresql://postgres:bajra@localhost:5433/news"
 
 # Database and metadata setup
 database = Database(DATABASE_URL)
@@ -121,6 +137,7 @@ def create_access_token(data: dict):
     expire = datetime.datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
     return encoded_jwt
 
 # Dashboard access validation function
