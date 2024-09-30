@@ -1,13 +1,17 @@
-from fastapi import FastAPI, File, HTTPException, Depends, UploadFile, status
+from fastapi import FastAPI, File, HTTPException, Request, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
 from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy import ForeignKey, null, select
 from databases import Database
 import sqlalchemy
 import logging
-import os
 from datetime import datetime, timedelta
 import jwt  # Use PyJWT for token creation and verification
 import datetime 
+
+
+# Define the HTTP Bearer Token security scheme
+bearer_scheme = HTTPBearer()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -120,7 +124,14 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 # Dashboard access validation function
-def get_current_user(token: str):
+def get_current_user(request: Request):
+    authorization = request.headers.get("Authorization")
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header not found")
+    
+    # Extract token from Authorization header
+    token = authorization.split(" ")[-1]
+    
     if token not in active_sessions:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
     
@@ -130,7 +141,7 @@ def get_current_user(token: str):
         role = payload.get("role")
         user_id = payload.get("user_id")  # Extract user_id from the payload
         if username is None or role is None or user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+            raise HTTPException(status_code=401, detail="Invalid token")
         return {"username": username, "role": role, "user_id": user_id}  # Return user_id here
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
@@ -173,10 +184,10 @@ async def login(user: UserLogin):
     active_sessions[access_token] = user.username
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/dashboard")
-async def read_dashboard(token: str):
-    current_user = get_current_user(token)  # Verify token and get user
-    if current_user['role'] != "user":  # Only allow access to users, not admins
+@app.get("/dashboard", dependencies=[Depends(bearer_scheme)])
+async def read_dashboard(request: Request):
+    current_user = get_current_user(request) #Extract token from header
+    if current_user['role'] != "user": 
         raise HTTPException(status_code=403, detail="Access denied")
     
     # Fetch user data from the database
@@ -204,11 +215,10 @@ async def read_dashboard(token: str):
         },
         "posts": posts_response
     }
-@app.get("/admin-dashboard")
-async def read_admin_dashboard(token: str):
-    current_user = get_current_user(token)
-    # Verify that the current user is the admin
-    if current_user['role'] != "admin":  # Only allow access to admin
+@app.get("/admin-dashboard", dependencies=[Depends(bearer_scheme)])
+async def read_admin_dashboard(request: Request):
+    current_user = get_current_user(request)
+    if current_user['role'] != "admin": 
         raise HTTPException(status_code=403, detail="Access denied")
 
     # Fetch the latest 5 posts from the posts table
@@ -231,17 +241,18 @@ async def read_admin_dashboard(token: str):
         "latest_posts": posts_response
     }
 
-@app.post("/logout")
-async def logout(token: str):
-    if token in active_sessions:
-        del active_sessions[token]  # Remove the token from active sessions
+@app.post("/logout", dependencies=[Depends(bearer_scheme)])
+async def logout(request: Request):
+    current_user = get_current_user(request)  # Token validation is now handled here
+    if active_sessions.get(request.headers.get("Authorization")):
+        del active_sessions[request.headers.get("Authorization")]
         return {"message": "Successfully logged out!"}
     else:
         raise HTTPException(status_code=400, detail="Token not found or already logged out.")
 
-@app.post("/dashboard/post")
-async def create_post(token: str, post_data: PostCreate):
-    current_user = get_current_user(token)  # Verify token and get user
+@app.post("/dashboard/post",dependencies=[Depends(bearer_scheme)])
+async def create_post(request: Request, post_data: PostCreate):
+    current_user = get_current_user(request)  # Verify token and get user
     if current_user['role'] != "user":
         raise HTTPException(status_code=403, detail="Access denied")
     
@@ -266,9 +277,9 @@ async def create_post(token: str, post_data: PostCreate):
 
     return {"message": "Post created successfully!"}
 
-@app.put("/dashboard/post/{post_id}")
-async def update_post(post_id: int, token: str, post_data: PostUpdate):
-    current_user = get_current_user(token)
+@app.put("/dashboard/post/{post_id}", dependencies=[Depends(bearer_scheme)])
+async def update_post(post_id: int, request: Request, post_data: PostUpdate):
+    current_user = get_current_user(request)  # Verify token and get user
 
     if current_user['role'] != "user":
         raise HTTPException(status_code=403, detail="Access denied")
@@ -297,9 +308,10 @@ async def update_post(post_id: int, token: str, post_data: PostUpdate):
 
 
 
-@app.delete("/dashboard/post/{post_id}")
-async def delete_post(post_id: int, token: str):
-    current_user = get_current_user(token)
+@app.delete("/dashboard/post/{post_id}",dependencies=[Depends(bearer_scheme)])
+async def delete_post(post_id: int, request: Request):
+    current_user = get_current_user(request)
+
 
     if current_user['role'] != "user":
         raise HTTPException(status_code=403, detail="Access denied")
