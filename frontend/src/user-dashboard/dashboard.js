@@ -94,14 +94,20 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-200 to-indigo-100 p-6">
+    <div
+      className="min-h-screen p-6 bg-blue-50"
+      // style={{ backgroundImage: `url('/background1.jpg')` }}
+    >
       <nav className="sticky top-0 z-10 bg-white bg-opacity-90 shadow-lg py-3 px-6 rounded-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex space-x-4">
-            <FaNewspaper className="text-indigo-600 text-4xl" />
-            <div className="text-indigo-600 text-3xl font-semibold">
+            <FaNewspaper className="text-teal-600 text-4xl" />
+            <div className="text-teal-600 text-3xl font-semibold">
               KhabarCheck
             </div>
+          </div>
+          <div className="ml-auto flex space-x-4 items-center">
+            <div className="text-lg font-semibold mr-4">User</div>
           </div>
           <button
             onClick={handleLogout}
@@ -113,16 +119,15 @@ const UserDashboard = () => {
       </nav>
 
       <div className="container mt-8 p-4 bg-white rounded-lg shadow-lg">
-        <div className="flex items-center mb-4">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-3xl font-bold mr-2">Dashboard</h2>
-          <span>Welcome to User Dashboard</span>
         </div>
 
         {/* Add New News Button */}
         <div className="mb-6 text-right">
           <button
             onClick={handleAddNewsClick}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600 transition duration-300"
+            className="bg-teal-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-teal-600 transition duration-300"
           >
             <FaPlus />
             <span>Add News</span>
@@ -156,7 +161,7 @@ const UserDashboard = () => {
               </p>
               <div className="flex space-x-2">
                 <button
-                  className="flex items-center text-indigo-600 hover:text-indigo-800 hover:underline transition duration-300"
+                  className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
                   onClick={() => handleView(post.id)}
                 >
                   <span className="flex items-center">
@@ -164,7 +169,7 @@ const UserDashboard = () => {
                   </span>
                 </button>
                 <button
-                  className="flex items-center text-indigo-600 px-3 py-1 hover:text-indigo-800 hover:underline transition duration-300"
+                  className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
                   onClick={() => handleEdit(post.id)}
                 >
                   <span className="flex items-center">
@@ -172,7 +177,7 @@ const UserDashboard = () => {
                   </span>
                 </button>
                 <button
-                  className="flex items-center text-indigo-600 hover:text-indigo-800 hover:underline transition duration-300"
+                  className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
                   onClick={() => handleDelete(post.id)}
                 >
                   <span className="flex items-center">
@@ -196,7 +201,7 @@ const UserDashboard = () => {
               name="title"
               value={newPost.title}
               onChange={handleInputChange}
-              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               required
             />
           </div>
@@ -206,14 +211,14 @@ const UserDashboard = () => {
               name="content"
               value={newPost.content}
               onChange={handleInputChange}
-              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               rows="3"
               required
             />
           </div>
           <button
             type="button"
-            className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition duration-300"
+            className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 transition duration-300"
             onClick={handleAnalyzeSentiment}
           >
             Analyze Sentiment
