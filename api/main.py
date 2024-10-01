@@ -215,7 +215,7 @@ async def read_dashboard(request: Request):
     user_posts = await database.fetch_all(post_query)
       # Format the posts for display
     posts_response = [
-        {"title": post["title"], "sentiment": post["sentiment"]}
+        {"title": post["title"], "sentiment": post["sentiment"], "post": post["post"]}
         for post in user_posts
     ]
 
