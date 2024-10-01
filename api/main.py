@@ -1,16 +1,17 @@
 from fastapi import FastAPI, File, HTTPException, Request, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
 from pydantic import BaseModel, EmailStr, validator
-from sqlalchemy import ForeignKey, null, select
+from sqlalchemy import ForeignKey, join, null, select
 from databases import Database
 import sqlalchemy
 import logging
 from datetime import datetime, timedelta
-
 import jwt  # Use PyJWT for token creation and verification
 import datetime 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+
 
 
 # Define the HTTP Bearer Token security scheme
@@ -133,7 +134,6 @@ def create_access_token(data: dict):
     expire = datetime.datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
     return encoded_jwt
 
 # Dashboard access validation function
@@ -215,7 +215,7 @@ async def read_dashboard(request: Request):
     user_posts = await database.fetch_all(post_query)
       # Format the posts for display
     posts_response = [
-        {"title": post["title"], "sentiment": post["sentiment"]}
+        {"title": post["title"], "sentiment": post["sentiment"], "post": post["post"]}
         for post in user_posts
     ]
 
@@ -228,23 +228,47 @@ async def read_dashboard(request: Request):
         },
         "posts": posts_response
     }
+
+
 @app.get("/admin-dashboard", dependencies=[Depends(bearer_scheme)])
 async def read_admin_dashboard(request: Request):
     current_user = get_current_user(request)
+    
+    # Check if the current user is an admin
     if current_user['role'] != "admin": 
         raise HTTPException(status_code=403, detail="Access denied")
 
-    # Fetch the latest 5 posts from the posts table
-    query = posts.select().order_by(posts.c.id.desc()).limit(5)
+    # Query to join posts and users tables and fetch the latest 5 posts
+    query = (
+        select(
+            posts.c.id,
+            posts.c.title,
+            posts.c.post,
+            posts.c.sentiment,
+            posts.c.user_id,
+            posts.c.created_date,
+            posts.c.updated_date,
+            users.c.username  # Get username from the users table
+        )
+        .select_from(
+            join(posts, users, posts.c.user_id == users.c.id)
+        )
+        .order_by(posts.c.id.desc())
+        .limit(5)
+    )
+    
     latest_posts = await database.fetch_all(query)
 
-    # Format the posts for display
+    # Format the posts for display, including username
     posts_response = [
         {
             "title": post["title"],
             "post": post["post"],
             "sentiment": post["sentiment"],
-            "user_id": post["user_id"]
+            "user_id": post["user_id"],
+            "username": post["username"],  # Username from users table
+            "created_date": post["created_date"],
+            "updated_date": post["updated_date"]
         }
         for post in latest_posts
     ]
@@ -253,6 +277,7 @@ async def read_admin_dashboard(request: Request):
         "message": f"Welcome to the Admin Dashboard, {current_user['username']}!",
         "latest_posts": posts_response
     }
+
 
 @app.post("/logout", dependencies=[Depends(bearer_scheme)])
 async def logout(request: Request):
@@ -353,3 +378,20 @@ async def read_root():
     except Exception as e:
         logging.error(f"Error checking database connection: {e}")
         raise HTTPException(status_code=500, detail="Database connection error")
+    
+@app.get("/home")
+async def get_home():
+    query = posts.select()
+    all_posts = await database.fetch_all(query)
+
+    # If there are no posts, return a message
+    if not all_posts:
+        raise HTTPException(status_code=404, detail="No posts found")
+
+    # Format posts to return a more user-friendly response
+    formatted_posts = [
+        {"title": post["title"], "sentiment": post["sentiment"]}
+        for post in all_posts
+    ]
+
+    return {"posts": formatted_posts}
