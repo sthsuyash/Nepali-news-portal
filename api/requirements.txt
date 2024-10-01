@@ -4,3 +4,6 @@ asyncpg
 sqlalchemy
 databases
 psycopg2
+PyJWT
+python-multipart
+pydantic

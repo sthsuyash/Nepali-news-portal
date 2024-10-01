@@ -353,3 +353,20 @@ async def read_root():
     except Exception as e:
         logging.error(f"Error checking database connection: {e}")
         raise HTTPException(status_code=500, detail="Database connection error")
+    
+@app.get("/home")
+async def get_home():
+    query = posts.select()
+    all_posts = await database.fetch_all(query)
+
+    # If there are no posts, return a message
+    if not all_posts:
+        raise HTTPException(status_code=404, detail="No posts found")
+
+    # Format posts to return a more user-friendly response
+    formatted_posts = [
+        {"title": post["title"], "sentiment": post["sentiment"]}
+        for post in all_posts
+    ]
+
+    return {"posts": formatted_posts}
