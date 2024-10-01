@@ -111,7 +111,7 @@ const AdminDashboard = () => {
           <h3 className="text-2xl font-semibold mb-3">Latest Posts</h3>
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {latestPosts && latestPosts.length > 0 ? (
-              latestPosts.map((post) => {
+              latestPosts.slice(0, 5).map((post) => {
                 const createdAt = new Date(post.created_date).toLocaleString();
                 const updatedAt = post.updated_date
                   ? new Date(post.updated_date).toLocaleString()
@@ -189,23 +189,23 @@ const AdminDashboard = () => {
           <h3 className="text-2xl font-semibold mb-3">Latest Users</h3>
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {latestPosts && latestPosts.length > 0 ? (
-              Array.from(new Set(latestPosts.map((user) => user.username))).map(
-                (username) => {
-                  const user = latestPosts.find((u) => u.username === username);
+              Array.from(
+                new Set(latestPosts.slice(0, 5).map((user) => user.username))
+              ).map((username) => {
+                const user = latestPosts.find((u) => u.username === username);
 
-                  return (
-                    <div
-                      key={user.user_id}
-                      className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
-                    >
-                      <h4 className="text-xl font-semibold mb-2">
-                        {user.username}
-                      </h4>
-                      <p className="text-sm text-gray-600">Posts: 5</p>
-                    </div>
-                  );
-                }
-              )
+                return (
+                  <div
+                    key={user.user_id}
+                    className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+                  >
+                    <h4 className="text-xl font-semibold mb-2">
+                      {user.username}
+                    </h4>
+                    <p className="text-sm text-gray-600">Posts: 5</p>
+                  </div>
+                );
+              })
             ) : (
               <p>No users available</p>
             )}
@@ -230,52 +230,59 @@ const AdminDashboard = () => {
           {/* All Posts */}
           <h3 className="text-2xl font-semibold mb-4">All Posts</h3>
           {latestPosts && latestPosts.length > 0 ? (
-            latestPosts.map((post) => (
-              <div
-                key={post.id}
-                className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
-              >
-                <h4 className="text-xl font-semibold">{post.title}</h4>
-                <p
-                  className={`text-sm mb-2 mt-2 ${
-                    post.sentiment === "Positive"
-                      ? "text-green-600"
-                      : post.sentiment === "Neutral"
-                      ? "text-amber-950"
-                      : "text-red-600"
-                  }`}
+            latestPosts.map((post) => {
+              const createdAt = new Date(post.created_date).toLocaleString();
+              const updatedAt = post.updated_date
+                ? new Date(post.updated_date).toLocaleString()
+                : "-";
+
+              return (
+                <div
+                  key={post.id}
+                  className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
                 >
-                  Sentiment: {post.sentiment || "N/A"}
-                </p>
-                <p className="text-xs">Created At: {post.created_date}</p>
-                <p className="text-xs">Updated At: {post.updatedAt || "-"}</p>
-                <p className="text-xs text-gray-600 mt-2">
-                  Posted by: {post.username}
-                </p>
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    <button
-                      className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
-                      onClick={() => handleViewPost(post.title)}
-                    >
-                      <FaEye className="mr-1" /> View
-                    </button>
-                    <button
-                      className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
-                      onClick={() => handleEditPost(post.title)}
-                    >
-                      <FaEdit className="mr-1" /> Edit
-                    </button>
-                    <button
-                      className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
-                      onClick={() => handleDeletePost(post.title)}
-                    >
-                      <FaTrash className="mr-1" /> Delete
-                    </button>
+                  <h4 className="text-xl font-semibold">{post.title}</h4>
+                  <p
+                    className={`text-sm mb-2 mt-2 ${
+                      post.sentiment === "Positive"
+                        ? "text-green-600"
+                        : post.sentiment === "Neutral"
+                        ? "text-amber-950"
+                        : "text-red-600"
+                    }`}
+                  >
+                    Sentiment: {post.sentiment || "N/A"}
+                  </p>
+                  <p className="text-xs">Created At: {createdAt}</p>
+                  <p className="text-xs">Updated At: {updatedAt}</p>
+                  <p className="text-xs text-gray-600 mt-2">
+                    Posted by: {post.username}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <button
+                        className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
+                        onClick={() => handleViewPost(post.title)}
+                      >
+                        <FaEye className="mr-1" /> View
+                      </button>
+                      <button
+                        className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
+                        onClick={() => handleEditPost(post.title)}
+                      >
+                        <FaEdit className="mr-1" /> Edit
+                      </button>
+                      <button
+                        className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
+                        onClick={() => handleDeletePost(post.title)}
+                      >
+                        <FaTrash className="mr-1" /> Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p>No posts available</p>
           )}
@@ -283,15 +290,21 @@ const AdminDashboard = () => {
           {/* All Users */}
           <h3 className="text-2xl font-semibold mt-8 mb-4">All Users</h3>
           {latestPosts && latestPosts.length > 0 ? (
-            latestPosts.map((user) => (
-              <div
-                key={user.user_id}
-                className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
-              >
-                <h4 className="text-xl font-semibold">{user.username}</h4>
-                <p className="text-sm">Posts: 5 </p>
-              </div>
-            ))
+            Array.from(
+              new Set(latestPosts.slice(0, 5).map((user) => user.username))
+            ).map((username) => {
+              const user = latestPosts.find((u) => u.username === username);
+
+              return (
+                <div
+                  key={user.user_id}
+                  className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
+                >
+                  <h4 className="text-xl font-semibold">{user.username}</h4>
+                  <p className="text-sm">Posts: 5 </p>
+                </div>
+              );
+            })
           ) : (
             <p>No users available</p>
           )}
