@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEdit, FaTrash, FaPlus, FaNewspaper } from "react-icons/fa";
-import { useRef } from "react";
+import axios from "../api/axios";
 
 const UserDashboard = () => {
-  const formRef = useRef(null); // Create a ref for the form
-  const handleAddNewsClick = () => {
-    // Scroll to the form when the button is clicked
-    if (formRef.current) {
-      formRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const formRef = useRef(null);
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const [newsPosts, setNewsPosts] = useState([]);
   const [newPost, setNewPost] = useState({
@@ -18,39 +14,35 @@ const UserDashboard = () => {
     content: "",
     sentiment: "",
   });
-
-  const navigate = useNavigate();
   const [sentimentResult, setSentimentResult] = useState("");
   const [canPost, setCanPost] = useState(false);
+  const [userData, setUserData] = useState({ username: "", email: "" });
 
+  // Fetch the dashboard data when the component mounts
   useEffect(() => {
-    // Fetch user's news posts from backend
-    setNewsPosts([
-      {
-        id: 1,
-        title: "News 1",
-        sentiment: "Positive",
-        createdAt: "2024-09-19",
-        updatedAt: "2024-09-20",
-      },
-      {
-        id: 2,
-        title: "News 2",
-        sentiment: "Neutral",
-        createdAt: "2024-09-18",
-        updatedAt: "2024-09-19",
-      },
-    ]);
-  }, []);
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axios.get("/dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const { user_data, posts } = response.data;
 
-  const handleEdit = (id) => {};
+        setUserData(user_data);
+        setNewsPosts(posts);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
 
-  const handleDelete = (id) => {};
+    fetchDashboardData();
+  }, [token]);
 
-  const handleView = (id) => {};
-
-  const handleLogout = () => {
-    navigate("/"); // Redirect to login page
+  const handleAddNewsClick = () => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const handleInputChange = (e) => {
@@ -61,11 +53,9 @@ const UserDashboard = () => {
   };
 
   const handleAnalyzeSentiment = () => {
-    // Temporary sentiment analysis logic
     const { content } = newPost;
     let sentiment = "Neutral";
 
-    // Mock analysis based on some keywords
     if (content.toLowerCase().includes("great")) {
       sentiment = "Positive";
     } else if (content.toLowerCase().includes("bad")) {
@@ -75,29 +65,57 @@ const UserDashboard = () => {
     setSentimentResult(sentiment);
     setNewPost({ ...newPost, sentiment });
 
-    // Enable posting if sentiment is Positive or Neutral
     setCanPost(sentiment === "Positive" || sentiment === "Neutral");
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (canPost) {
-      console.log("Posting news:", newPost);
-      setNewsPosts([...newsPosts, newPost]);
+      const postPayload = {
+        title: newPost.title,
+        post: newPost.content,
+        isPublished: true,
+      };
 
-      // Reset form
-      setNewPost({ title: "", content: "", sentiment: "" });
-      setSentimentResult("");
-      setCanPost(false);
+      try {
+        const response = await axios.post("/dashboard/post", postPayload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Add the new post to the current list of posts
+        setNewsPosts([...newsPosts, newPost]);
+
+        // Reset form
+        setNewPost({ title: "", content: "", sentiment: "" });
+        setSentimentResult("");
+        setCanPost(false);
+      } catch (error) {
+        console.error("Error posting news:", error);
+        alert("Failed to post news");
+      }
     } else {
       alert("Cannot post news with negative sentiment");
     }
   };
 
+  const handleEdit = (id) => {
+    // Implement edit functionality here
+  };
+
+  const handleDelete = (id) => {
+    // Implement delete functionality here
+  };
+
+  const handleView = (id) => {
+    // Implement view functionality here
+  };
+
+  const handleLogout = () => {
+    navigate("/");
+  };
   return (
-    <div
-      className="min-h-screen p-6 bg-blue-50"
-      // style={{ backgroundImage: `url('/background1.jpg')` }}
-    >
+    <div className="min-h-screen p-6 bg-blue-50">
       <nav className="sticky top-0 z-10 bg-white bg-opacity-90 shadow-lg py-3 px-6 rounded-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex space-x-4">
@@ -107,7 +125,7 @@ const UserDashboard = () => {
             </div>
           </div>
           <div className="ml-auto flex space-x-4 items-center">
-            <div className="text-lg font-semibold mr-4">User</div>
+            <div className="text-lg mr-4">{userData.username}</div>
           </div>
           <button
             onClick={handleLogout}
@@ -123,7 +141,6 @@ const UserDashboard = () => {
           <h2 className="text-3xl font-bold mr-2">Dashboard</h2>
         </div>
 
-        {/* Add New News Button */}
         <div className="mb-6 text-right">
           <button
             onClick={handleAddNewsClick}
@@ -134,55 +151,34 @@ const UserDashboard = () => {
           </button>
         </div>
 
-        {/* News Overview */}
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {newsPosts.map((post, index) => (
             <div
-              key={post.id}
+              key={index}
               className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
             >
               <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
-              <p
-                className={`text-sm mb-2 ${
-                  post.sentiment === "Positive"
-                    ? "text-green-600"
-                    : post.sentiment === "Neutral"
-                    ? "text-amber-950	"
-                    : "text-red-600"
-                }`}
-              >
-                Sentiment: {post.sentiment}
-              </p>
-              <p className="text-xs text-gray-600">
-                Created At: {post.createdAt}
-              </p>
-              <p className="text-xs text-gray-600 mb-2">
-                Updated At: {post.updatedAt}
+              <p className="text-sm mb-2 text-gray-600">
+                Sentiment: {post.sentiment || "Unknown"}
               </p>
               <div className="flex space-x-2">
                 <button
                   className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
-                  onClick={() => handleView(post.id)}
+                  onClick={() => handleView(index)}
                 >
-                  <span className="flex items-center">
-                    <FaEye className="mr-1" /> View
-                  </span>
+                  <FaEye className="mr-1" /> View
                 </button>
                 <button
-                  className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
-                  onClick={() => handleEdit(post.id)}
+                  className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
+                  onClick={() => handleEdit(index)}
                 >
-                  <span className="flex items-center">
-                    <FaEdit className="mr-1" /> Edit
-                  </span>
+                  <FaEdit className="mr-1" /> Edit
                 </button>
                 <button
                   className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
-                  onClick={() => handleDelete(post.id)}
+                  onClick={() => handleDelete(index)}
                 >
-                  <span className="flex items-center">
-                    <FaTrash className="mr-1" /> Delete
-                  </span>
+                  <FaTrash className="mr-1" /> Delete
                 </button>
               </div>
             </div>
@@ -190,7 +186,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Form for new news posting */}
       <div ref={formRef} className="mt-12 p-6 bg-white rounded-lg shadow-lg">
         <h3 className="text-2xl font-bold mb-4">Publish Article</h3>
         <form className="space-y-4">
@@ -243,7 +238,7 @@ const UserDashboard = () => {
           type="button"
           className={`mt-4 px-4 py-2 rounded text-white ${
             canPost
-              ? "bg-green-500 hover:bg-green-600"
+              ? "bg-teal-500 hover:bg-teal-600"
               : "bg-gray-500 cursor-not-allowed"
           } transition duration-300`}
           onClick={handlePost}
