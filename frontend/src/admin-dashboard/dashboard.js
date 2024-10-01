@@ -1,86 +1,85 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaEye, FaEdit, FaTrash, FaNewspaper } from "react-icons/fa";
-
+import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  const formRef = useRef(null);
   const [latestPosts, setLatestPosts] = useState([]);
-  const [latestUsers, setLatestUsers] = useState([]);
-  const [allPosts, setAllPosts] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
   const [viewAll, setViewAll] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch latest 5 posts and users
-    setLatestPosts([
-      {
-        id: 1,
-        title: "News 1",
-        sentiment: "Positive",
-        createdAt: "2024-09-19",
-        updatedAt: "2024-09-20",
-        postedby: "John Doe",
-      },
-      {
-        id: 2,
-        title: "News 2",
-        sentiment: "Positive",
-        createdAt: "2024-09-19",
-        updatedAt: "2024-09-20",
-        postedby: "Jane Smith",
-      },
-      {
-        id: 3,
-        title: "News 3",
-        sentiment: "Positive",
-        createdAt: "2024-09-19",
-        updatedAt: "2024-09-20",
-        postedby: "John Doe",
-      },
-      {
-        id: 4,
-        title: "News 4",
-        sentiment: "Neutral",
-        createdAt: "2024-09-18",
-        updatedAt: "2024-09-19",
-        postedby: "Jane Smith",
-      },
-    ]);
-    setLatestUsers([
-      { id: 1, name: "John Doe", email: "john@example.com" },
-      { id: 2, name: "Jane Smith", email: "jane@example.com" },
-      // More mock users...
-    ]);
-  }, []);
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axios.get("/admin-dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const navigate = useNavigate();
+        const { latest_posts } = response.data;
+        setLatestPosts(latest_posts);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+
+    fetchDashboardData();
+  }, [token]);
+
   const handleLogout = () => {
-    navigate("/"); // Redirect to login page
+    navigate("/login"); // Redirect to login page
   };
 
-  const handleViewAll = () => {
-    // Fetch all posts and users
+  const handleViewAllPosts = () => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth" });
+    }
     setViewAll(true);
-    setAllPosts([
-      // Mock data for all posts
-      {
-        id: 3,
-        title: "News 3",
-        createdAt: "2024-09-17",
-        updatedAt: "2024-09-18",
-      },
-      // Other posts...
-    ]);
-    setAllUsers([
-      // Mock data for all users
-      { id: 3, name: "Jack White", email: "jack@example.com" },
-      // Other users...
-    ]);
+    // Fetch all posts (modify this if you need real backend fetching)
   };
 
-  const handleEditPost = (id) => {};
-  const handleDeletePost = (id) => {};
-  const handleViewPost = (id) => {};
+  const handleViewAllUsers = () => {
+    setViewAll(true);
+    // Fetch all users (modify this if you need real backend fetching)
+  };
+
+  const handleEditPost = async (id) => {
+    try {
+      const updatedContent = {
+        title: "Updated Title",
+        content: "Updated Content",
+      }; // Example update
+      await axios.put(`/dashboard/post/${id}`, updatedContent, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Post updated successfully!");
+      // You may want to refetch the posts or update the state
+    } catch (error) {
+      console.error("Error updating post:", error);
+    }
+  };
+
+  const handleDeletePost = async (id) => {
+    try {
+      await axios.delete(`/dashboard/post/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Post deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
+  const handleViewPost = (id) => {
+    console.log(`Viewing post with ID: ${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-blue-50 p-6">
@@ -111,68 +110,75 @@ const AdminDashboard = () => {
         <div className="mb-6">
           <h3 className="text-2xl font-semibold mb-3">Latest Posts</h3>
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post) => (
-              <div
-                key={post.id}
-                className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
-              >
-                <h4 className="text-xl font-semibold mb-2">{post.title}</h4>
-                <p
-                  className={`text-sm mb-2 ${
-                    post.sentiment === "Positive"
-                      ? "text-green-600"
-                      : post.sentiment === "Neutral"
-                      ? "text-amber-950	"
-                      : "text-red-600"
-                  }`}
-                >
-                  Sentiment: {post.sentiment}
-                </p>
-                <p className="text-xs text-gray-600">
-                  Created At: {post.createdAt}
-                </p>
-                <p className="text-xs text-gray-600 mb-2">
-                  Updated At: {post.updatedAt}
-                </p>
-                <div className="ml-auto text-xs text-gray-600 mb-1">
-                  Posted By: {post.postedby}
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    <button
-                      className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
-                      onClick={() => handleViewPost(post.id)}
+            {latestPosts && latestPosts.length > 0 ? (
+              latestPosts.map((post) => {
+                const createdAt = new Date(post.created_date).toLocaleString();
+                const updatedAt = post.updated_date
+                  ? new Date(post.updated_date).toLocaleString()
+                  : "-";
+
+                return (
+                  <div
+                    key={post.title}
+                    className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+                  >
+                    <h4 className="text-xl font-semibold mb-2">{post.title}</h4>
+
+                    <p
+                      className={`text-sm mb-2 ${
+                        post.sentiment === "Positive"
+                          ? "text-green-600"
+                          : post.sentiment === "Neutral"
+                          ? "text-amber-950"
+                          : "text-red-600"
+                      }`}
                     >
-                      <span className="flex items-center">
-                        <FaEye className="mr-1" /> View
-                      </span>
-                    </button>
-                    <button
-                      className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
-                      onClick={() => handleEditPost(post.id)}
-                    >
-                      <span className="flex items-center">
-                        <FaEdit className="mr-1" /> Edit
-                      </span>
-                    </button>
-                    <button
-                      className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
-                      onClick={() => handleDeletePost(post.id)}
-                    >
-                      <span className="flex items-center">
-                        <FaTrash className="mr-1" /> Delete
-                      </span>
-                    </button>
+                      Sentiment: {post.sentiment || "N/A"}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Created At : {createdAt}
+                    </p>
+                    <p className="text-xs text-gray-600 mb-2">
+                      Updated At: {updatedAt}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Posted by: {post.username}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <div className="flex space-x-2">
+                        <button
+                          className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
+                          onClick={() => handleViewPost(post.title)}
+                        >
+                          <FaEye className="mr-1" /> View
+                        </button>
+                        <button
+                          className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
+                          onClick={() => handleEditPost(post.title)}
+                        >
+                          <FaEdit className="mr-1" /> Edit
+                        </button>
+                        <button
+                          className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
+                          onClick={() => handleDeletePost(post.title)}
+                        >
+                          <FaTrash className="mr-1" /> Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            ) : (
+              <p>No posts available</p>
+            )}
           </div>
         </div>
+
         <div className="text-center">
           <button
             className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600  transition duration-300"
-            onClick={handleViewAll}
+            onClick={handleViewAllPosts}
           >
             View All Posts
           </button>
@@ -182,23 +188,34 @@ const AdminDashboard = () => {
         <div className="mb-6">
           <h3 className="text-2xl font-semibold mb-3">Latest Users</h3>
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {latestUsers.map((user) => (
-              <div
-                key={user.id}
-                className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
-              >
-                <h4 className="text-xl font-semibold mb-2">{user.name}</h4>
-                <p className="text-sm text-gray-600">Email: {user.email}</p>
-              </div>
-            ))}
+            {latestPosts && latestPosts.length > 0 ? (
+              Array.from(new Set(latestPosts.map((user) => user.username))).map(
+                (username) => {
+                  const user = latestPosts.find((u) => u.username === username);
+
+                  return (
+                    <div
+                      key={user.user_id}
+                      className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+                    >
+                      <h4 className="text-xl font-semibold mb-2">
+                        {user.username}
+                      </h4>
+                      <p className="text-sm text-gray-600">Posts: 5</p>
+                    </div>
+                  );
+                }
+              )
+            ) : (
+              <p>No users available</p>
+            )}
           </div>
         </div>
 
-        {/* View All Button */}
         <div className="text-center">
           <button
             className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition duration-300"
-            onClick={handleViewAll}
+            onClick={handleViewAllUsers}
           >
             View All Users
           </button>
@@ -206,31 +223,78 @@ const AdminDashboard = () => {
       </div>
 
       {viewAll && (
-        <div className="container mt-8 p-4 bg-white rounded-lg shadow-lg">
+        <div
+          ref={formRef}
+          className="container mt-8 p-4 bg-white rounded-lg shadow-lg"
+        >
           {/* All Posts */}
           <h3 className="text-2xl font-semibold mb-4">All Posts</h3>
-          {allPosts.map((post) => (
-            <div
-              key={post.id}
-              className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
-            >
-              <h4 className="text-xl font-semibold">{post.title}</h4>
-              <p className="text-sm">Created At: {post.createdAt}</p>
-              <p className="text-sm">Updated At: {post.updatedAt}</p>
-            </div>
-          ))}
+          {latestPosts && latestPosts.length > 0 ? (
+            latestPosts.map((post) => (
+              <div
+                key={post.id}
+                className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
+              >
+                <h4 className="text-xl font-semibold">{post.title}</h4>
+                <p
+                  className={`text-sm mb-2 mt-2 ${
+                    post.sentiment === "Positive"
+                      ? "text-green-600"
+                      : post.sentiment === "Neutral"
+                      ? "text-amber-950"
+                      : "text-red-600"
+                  }`}
+                >
+                  Sentiment: {post.sentiment || "N/A"}
+                </p>
+                <p className="text-xs">Created At: {post.created_date}</p>
+                <p className="text-xs">Updated At: {post.updatedAt || "-"}</p>
+                <p className="text-xs text-gray-600 mt-2">
+                  Posted by: {post.username}
+                </p>
+                <div className="flex justify-between items-center">
+                  <div className="flex space-x-2">
+                    <button
+                      className="flex items-center text-teal-600 hover:text-teal-800 hover:underline transition duration-300"
+                      onClick={() => handleViewPost(post.title)}
+                    >
+                      <FaEye className="mr-1" /> View
+                    </button>
+                    <button
+                      className="flex items-center text-teal-600 px-3 py-1 hover:text-teal-800 hover:underline transition duration-300"
+                      onClick={() => handleEditPost(post.title)}
+                    >
+                      <FaEdit className="mr-1" /> Edit
+                    </button>
+                    <button
+                      className="flex items-center text-red-500 hover:text-red-600 hover:underline transition duration-300"
+                      onClick={() => handleDeletePost(post.title)}
+                    >
+                      <FaTrash className="mr-1" /> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>No posts available</p>
+          )}
 
           {/* All Users */}
           <h3 className="text-2xl font-semibold mt-8 mb-4">All Users</h3>
-          {allUsers.map((user) => (
-            <div
-              key={user.id}
-              className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
-            >
-              <h4 className="text-xl font-semibold">{user.name}</h4>
-              <p className="text-sm">Email: {user.email}</p>
-            </div>
-          ))}
+          {latestPosts && latestPosts.length > 0 ? (
+            latestPosts.map((user) => (
+              <div
+                key={user.user_id}
+                className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
+              >
+                <h4 className="text-xl font-semibold">{user.username}</h4>
+                <p className="text-sm">Posts: 5 </p>
+              </div>
+            ))
+          ) : (
+            <p>No users available</p>
+          )}
         </div>
       )}
     </div>

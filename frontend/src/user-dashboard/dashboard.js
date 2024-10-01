@@ -54,7 +54,7 @@ const UserDashboard = () => {
 
   const handleAnalyzeSentiment = () => {
     const { content } = newPost;
-    let sentiment = "Neutral";
+    let sentiment = "Positive";
 
     if (content.toLowerCase().includes("great")) {
       sentiment = "Positive";
@@ -158,8 +158,20 @@ const UserDashboard = () => {
               className="p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition duration-300"
             >
               <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
-              <p className="text-sm mb-2 text-gray-600">
+              <p
+                className={`text-sm mb-2 ${
+                  post.sentiment === "Positive"
+                    ? "text-green-600"
+                    : post.sentiment === "Neutral"
+                    ? "text-amber-950	"
+                    : "text-red-600"
+                }`}
+              >
                 Sentiment: {post.sentiment || "Unknown"}
+              </p>
+              <p className="text-xs text-gray-600">Created At: 2024-11-11</p>
+              <p className="text-xs text-gray-600 mb-2">
+                Updated At: 2024-11-11
               </p>
               <div className="flex space-x-2">
                 <button
