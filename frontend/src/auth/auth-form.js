@@ -60,13 +60,11 @@ const LoginSignup = () => {
         localStorage.setItem("token", accesToken);
 
         setAuth({ user: formData.username, role: "user", accesToken });
-        if
-        (formData.username === "admin")
-        {
+        if (formData.username === "admin") {
           navigate("/admin/dashboard");
-        }else {
-        navigate("/user/dashboard");
-      }
+        } else {
+          navigate("/user/dashboard");
+        }
       } else {
         // Signup API call
         if (formData.password !== formData.confirmPassword) {
@@ -94,13 +92,17 @@ const LoginSignup = () => {
 
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  const handleLogo = () => {
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center backdrop-blur-sm">
       <div className="w-full max-w-2xl bg-slate-200 shadow-md rounded-2xl p-8">
-        <div className="text-left flex space-x-4 mb-6">
+        <button onClick={handleLogo} className="text-left flex space-x-4 mb-6 ">
           <FaNewspaper className="text-teal-600 text-3xl" />
           <h1 className="text-2xl font-bold text-teal-600">KhabarCheck</h1>
-        </div>
+        </button>
 
         <h2 className="text-3xl font-login text-left mb-6">
           {isLogin ? "Log in to KhabarCheck" : "Create your account"}
