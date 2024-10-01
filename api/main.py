@@ -6,24 +6,11 @@ from databases import Database
 import sqlalchemy
 import logging
 from datetime import datetime, timedelta
-import jwt  # This should be from the PyJWT library
-import datetime
+
+import jwt  # Use PyJWT for token creation and verification
+import datetime 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-
-app = FastAPI()
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    access_control_allow_origins=["*"],
-    allow_origins=["*"],  # Allow requests from the frontend
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
-)
-
 
 
 # Define the HTTP Bearer Token security scheme
@@ -70,6 +57,15 @@ metadata.create_all(engine)  # Create tables in the database if they don't exist
 
 # FastAPI app instance
 app = FastAPI()
+
+# Add CORSMiddleware before the routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allowed frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Function to check database connection status
 async def check_database_connection():
