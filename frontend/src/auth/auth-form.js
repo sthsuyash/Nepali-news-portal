@@ -57,9 +57,16 @@ const LoginSignup = () => {
 
         console.log("Login Successful:", JSON.stringify(response?.data));
         const accesToken = response?.data?.access_token;
+        localStorage.setItem("token", accesToken);
 
         setAuth({ user: formData.username, role: "user", accesToken });
+        if
+        (formData.username === "admin")
+        {
+          navigate("/admin/dashboard");
+        }else {
         navigate("/user/dashboard");
+      }
       } else {
         // Signup API call
         if (formData.password !== formData.confirmPassword) {
@@ -81,7 +88,7 @@ const LoginSignup = () => {
         "Error during authentication:",
         error.response ? error.response.data : error.message
       );
-      alert("Invalid Username or Password");
+      alert("Invalid Credentials");
     }
   };
 
