@@ -8,6 +8,10 @@ import logging
 from datetime import datetime, timedelta
 import jwt  # Use PyJWT for token creation and verification
 import datetime 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 
 # Define the HTTP Bearer Token security scheme
@@ -54,6 +58,15 @@ metadata.create_all(engine)  # Create tables in the database if they don't exist
 
 # FastAPI app instance
 app = FastAPI()
+
+# Add CORSMiddleware before the routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allowed frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Function to check database connection status
 async def check_database_connection():
