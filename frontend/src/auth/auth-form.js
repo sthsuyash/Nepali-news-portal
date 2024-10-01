@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaNewspaper } from "react-icons/fa";
-import axios from "axios";
+import axios from "../api/axios";
+import AuthContext from "../context/AuthProvider";
 
 const LoginSignup = () => {
+  const { setAuth } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -39,15 +41,24 @@ const LoginSignup = () => {
 
     try {
       if (isLogin) {
-        const response = await axios.post("http://127.0.0.1:8000/login", {
-          username: formData.username,
-          password: formData.password,
-        });
+        const response = await axios.post(
+          "/login",
+          JSON.stringify({
+            username: formData.username,
+            password: formData.password,
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
 
-        console.log("Login Successful:", response.data);
+        console.log("Login Successful:", JSON.stringify(response?.data));
+        const accesToken = response?.data?.access_token;
 
-        console.log("Login Successful:", response.data);
-        localStorage.setItem("token", response.data.access_token);
+        setAuth({ user: formData.username, role: "user", accesToken });
         navigate("/user/dashboard");
       } else {
         // Signup API call
@@ -55,7 +66,7 @@ const LoginSignup = () => {
           alert("Passwords don't match!");
           return;
         }
-        const response = await axios.post("http://127.0.0.1:8000/register", {
+        const response = await axios.post("/register", {
           username: formData.username,
           email: formData.email,
           phone_number: formData.phone_number,
