@@ -6,11 +6,12 @@ from databases import Database
 import sqlalchemy
 import logging
 from datetime import datetime, timedelta
-
 import jwt  # Use PyJWT for token creation and verification
 import datetime 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+
 
 
 # Define the HTTP Bearer Token security scheme
@@ -133,7 +134,6 @@ def create_access_token(data: dict):
     expire = datetime.datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
     return encoded_jwt
 
 # Dashboard access validation function
@@ -378,20 +378,3 @@ async def read_root():
     except Exception as e:
         logging.error(f"Error checking database connection: {e}")
         raise HTTPException(status_code=500, detail="Database connection error")
-    
-@app.get("/home")
-async def get_home():
-    query = posts.select()
-    all_posts = await database.fetch_all(query)
-
-    # If there are no posts, return a message
-    if not all_posts:
-        raise HTTPException(status_code=404, detail="No posts found")
-
-    # Format posts to return a more user-friendly response
-    formatted_posts = [
-        {"title": post["title"], "sentiment": post["sentiment"]}
-        for post in all_posts
-    ]
-
-    return {"posts": formatted_posts}

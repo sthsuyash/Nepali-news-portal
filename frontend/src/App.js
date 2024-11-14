@@ -1,20 +1,26 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Header from "../src/component/common/header/Header";
 import "./App.css";
-import LoginSignup from "./auth/auth-form.js";
-import UserDashboard from "./user-dashboard/dashboard.js";
-import AdminDashboard from "./admin-dashboard/dashboard.js";
+import Homepages from "../src/component/home/Homepages";
+import Footer from "../src/component/common/footer/Footer";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import SinglePage from "../src/component/singlePage/SinglePage";
+import Culture from "../src/component/culture/Culture";
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LoginSignup />} />
-        <Route path="/user/dashboard" element={<UserDashboard />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Homepages />} />
+          <Route path="/singlepage/:id" element={<SinglePage />} />
+          <Route path="/culture" element={<Culture />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </>
   );
-}
+};
 
 export default App;

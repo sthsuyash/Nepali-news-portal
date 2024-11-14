@@ -7,7 +7,12 @@ module.exports = {
       body: ["Montserrat", "sans-serif"],
       login: ["Fredoka", "sans-serif"],
     },
-    extend: {},
+    extend: {
+      spacing: {
+        50: "50px",
+        100: "100px",
+      },
+    },
   },
   plugins: [],
 };
