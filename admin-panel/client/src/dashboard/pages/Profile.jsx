@@ -16,26 +16,26 @@ const Profile = () => {
                     <input className='hidden' type="file" id='img' />
                 </div>
                 <div className='text-[#404040] flex flex-col gap-y-1 justify-center items-start'>
-                    <span>Name : Sheikh Farid</span>
-                    <span>Email : farid@gmail.com</span>
+                    <span>Name : Amish Bajracharya</span>
+                    <span>Email : amish@twelveletter.co</span>
                     <span>Category : Education</span>
                 </div>
             </div>
             <div className='bg-white px-6 py-4 text-[#404040]'>
-                <h2 className='pb-3 text-center'>Cheange password</h2>
+                <h2 className='pb-3 text-center'>Change Password</h2>
 
                 <form>
                     <div className='grid grid-cols-1 gap-y-5 mb-3'>
                         <div className='flex flex-col gap-y-2'>
                             <div className='flex flex-col gap-y-2'>
                                 <label className='text-md font-medium text-gray-600' htmlFor="old_password">Old Password</label>
-                                <input type="password" placeholder='old password' name='old_password' className='px-3 py-2 rounded-md outline-0 border border-gray-300 focus:border-green-500 h-10' id='old_password' />
+                                <input type="password" placeholder='Enter old Password' name='old_password' className='px-3 py-2 rounded-md outline-0 border border-gray-300 focus:border-green-500 h-10' id='old_password' />
                             </div>
                         </div>
                         <div className='flex flex-col gap-y-2'>
                             <div className='flex flex-col gap-y-2'>
                                 <label className='text-md font-medium text-gray-600' htmlFor="new_password">New Password</label>
-                                <input type="password" placeholder='new password' name='new_password' className='px-3 py-2 rounded-md outline-0 border border-gray-300 focus:border-green-500 h-10' id='new_password' />
+                                <input type="password" placeholder='Enter new password' name='new_password' className='px-3 py-2 rounded-md outline-0 border border-gray-300 focus:border-green-500 h-10' id='new_password' />
                             </div>
                         </div>
                     </div>
