@@ -10,6 +10,12 @@ yarn.lock
 # Unignore all with extensions
 !*.*
 
+next-env.d.ts
+.next/
+node_modules/
+package-lock.json
+yarn.lock
+
 # Unignore all dirs
 !*/
 
