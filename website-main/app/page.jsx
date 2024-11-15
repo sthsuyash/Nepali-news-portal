@@ -12,15 +12,14 @@ import { base_api_url } from "@/config/config";
 
 const Home = async () => {
   const news_data = await fetch(`${base_api_url}/api/all/news`, {
-    next: {
-      revalidate: 5,
+    next: { revalidate: 5 },
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
     },
   });
 
   let news = await news_data?.json();
-  console.log();
-  
-
   news = news.news
   
   return (

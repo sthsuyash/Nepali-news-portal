@@ -1,6 +1,8 @@
 # Ignore all
 *
 
+dist/
+
 # Unignore all with extensions
 !*.*
 

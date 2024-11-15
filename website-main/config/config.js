@@ -1,8 +1,8 @@
 const production = "production";
 const local = "dev";
 
-const local_api_url = "http://localhost:5173";
-const production_api_url = "http://localhost:5173";
+const local_api_url = "http://localhost:5000";
+const production_api_url = "http://localhost:5000";
 
 const mode = local;
 
