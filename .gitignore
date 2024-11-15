@@ -2,6 +2,10 @@
 *
 
 dist/
+.env
+**/.env
+
+yarn.lock
 
 # Unignore all with extensions
 !*.*
