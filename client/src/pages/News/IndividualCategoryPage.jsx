@@ -6,7 +6,7 @@ import Category from '../../components/Public/Category';
 import Search from '../../components/Public/Search';
 import PopularNews from '../../components/Public/News/PopularNews';
 import RecentNews from '../../components/Public/News/RecentNews';
-import SimpleDetailsNewCard from '../../components/Public/News/items/SimpleDetailsNewCard';
+import SimpleDetailsNewCard from '../../components/Public/News/Items/SimpleDetailsNewCard';
 import { BASE_API_URL } from '../../config';
 
 const IndividualCategoryPage = () => {

@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "nodemon index.js",
 		"start": "node index.js",
-		"build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+		"build": "npm install && npm install --prefix ../client && npm run build --prefix ../client",
 		"prisma:generate": "npx prisma generate",
 		"prisma:migrate": "npx prisma migrate dev --name init",
 		"seed": "node prisma/seeders/index.js"

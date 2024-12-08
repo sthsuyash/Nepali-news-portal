@@ -32,6 +32,10 @@ app.use(cors({
 	credentials: true, // Allow credentials like cookies
 }));
 
+app.get("/", (req, res) => {
+	res.send("Hello World!");
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(morganConfig);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Title from './Title';
-import SimpleDetailsNewCard from './items/SimpleDetailsNewCard';
+import SimpleDetailsNewCard from './Items/SimpleDetailsNewCard';
 import { BASE_API_URL } from '../../../config';
 
 const PopularNews = ({ type }) => {

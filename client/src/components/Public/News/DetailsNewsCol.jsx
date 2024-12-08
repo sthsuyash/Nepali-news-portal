@@ -1,5 +1,5 @@
 import Title from "./Title";
-import SimpleDetailsNewCard from "./items/SimpleDetailsNewCard";
+import SimpleDetailsNewCard from "./Items/SimpleDetailsNewCard";
 import NewsCard from "./Items/NewsCard";
 
 const DetailsNewsCol = ({ news, category }) => {
