@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String
+  phone      String?
+  password   String
+  lastLogin  DateTime @default(now())
+  isVerified Boolean  @default(false)
+
+  roleId Int
+  role   Role @relation(fields: [roleId], references: [id])
+
+  verificationToken          String?
+  verificationTokenExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]
+  comments  Comment[]
+  bookmarks Bookmark[]
+}
+
+model Category {
+  id         Int    @id @default(autoincrement())
+  name       String @unique
+  nepaliName String @unique
+  posts      Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  image       String?
+  description String
+  status      PostStatus @default(PUBLISHED)
+  visitCount  Int        @default(0)
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  comments Comment[]
+
+  sentimentId Int
+  sentiment   Sentiment @relation(fields: [sentimentId], references: [id])
+
+  bookmarks Bookmark[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([title, description], name: "post_title_description_idx")
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Sentiment {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[]
+}
+
+model Bookmark {
+  id     String @id @default(cuid())
+  userId String
+  postId String
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId]) // Ensure unique bookmarks
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}

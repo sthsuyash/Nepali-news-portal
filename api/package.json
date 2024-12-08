@@ -1,32 +1,37 @@
 {
-  "name": "new_portal",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "server": "nodemon server.js",
-    "client": "npm run dev --prefix client",
-    "start": "node server.js",
-    "build": "npm run build --prefix client",
-    "dev": "concurrently \" npm run server \" \" npm run client \""
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.2",
-    "cloudinary": "^1.41.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "formidable": "^3.5.1",
-    "jsonwebtoken": "^9.0.2",
-    "moment": "^2.30.1",
-    "mongoose": "^8.0.3"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.0.2"
-  }
+	"name": "news-portal-api",
+	"version": "1.0.0",
+	"description": "This is a news portal API",
+	"main": "index.js",
+	"scripts": {
+		"dev": "nodemon index.js",
+		"start": "node index.js",
+		"build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+		"prisma:generate": "npx prisma generate",
+		"prisma:migrate": "npx prisma migrate dev --name init",
+		"seed": "node prisma/seeders/index.js"
+	},
+	"keywords": [],
+	"author": "",
+	"type": "module",
+	"license": "ISC",
+	"dependencies": {
+		"@faker-js/faker": "^9.3.0",
+		"@prisma/client": "6.0.1",
+		"bcryptjs": "^2.4.3",
+		"chalk": "^5.3.0",
+		"cookie-parser": "^1.4.6",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.19.2",
+		"jsonwebtoken": "^9.0.2",
+		"mailtrap": "^3.4.0",
+		"mongoose": "^8.5.2",
+		"morgan": "^1.10.0",
+		"nodemailer": "^6.9.16"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.4",
+		"prisma": "^6.0.1"
+	}
 }

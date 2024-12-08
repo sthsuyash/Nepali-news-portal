@@ -3,7 +3,7 @@
 
 dist/
 .env
-**/.env
+.next
 
 yarn.lock
 
