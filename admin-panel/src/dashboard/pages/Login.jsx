@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import { base_url } from '../../config/config'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import toast from 'sonner'
 import storeContext from '../../context/storeContext'
 
 const Login = () => {

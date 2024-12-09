@@ -1,4 +1,4 @@
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import { useAuthStore } from "./store/authStore";
 import { useEffect } from "react";
 
@@ -110,7 +110,10 @@ function App() {
         <Route path="/error" element={<ErrorPage />} />
         <Route path="*" element={<Navigate to="/error" replace />} />
       </Routes>
-<Toaster />
+      <Toaster 
+        richColors
+        position="bottom-right"
+      />
       <Footer />
     </div>
   );

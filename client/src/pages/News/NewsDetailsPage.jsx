@@ -10,7 +10,7 @@ import parser from "html-react-parser";
 import RelatedNews from "../../components/Public/News/RelatedNews";
 import RecentNews from "../../components/Public/News/RecentNews.jsx";
 
-import toast from 'react-hot-toast';  // Import react-hot-toast for notifications
+import toast from 'sonner';  // Import sonner for notifications
 import { TrashIcon, SendHorizonal, Edit2 } from "lucide-react";
 
 import { BASE_API_URL } from "../../config/index.js";

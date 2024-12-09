@@ -24,10 +24,10 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-fast-marquee": "^1.6.5",
-    "react-hot-toast": "^2.4.1",
     "react-multi-carousel": "^2.8.5",
     "react-router-dom": "^6.26.0",
     "react-spinners-components": "^2.0.4",
+    "sonner": "^1.7.1",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
