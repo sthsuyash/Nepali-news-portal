@@ -22,7 +22,7 @@ const __dirname = path.resolve();
 
 // Environment-specific CORS configuration
 if (NODE_ENV === "development") {
-	CLIENT_URL = "*"; // Allow all origins in development
+	CLIENT_URL = "http://localhost:5173"
 } else {
 	CLIENT_URL = config.server.clientURL;
 }

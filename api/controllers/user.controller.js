@@ -38,7 +38,8 @@ export const getUserDetails = async (req, res) => {
                 updatedAt: true,
                 _count: {
                     select: {
-                        comments: true
+                        comments: true,
+                        bookmarks: true,
                     },
                 }
             },
@@ -62,6 +63,8 @@ export const getUserDetails = async (req, res) => {
             lastLogin: user.lastLogin,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            comments: user._count.comments,
+            bookmarks: user._count.bookmarks,
         }
 
         res.status(200).json(createResponse(

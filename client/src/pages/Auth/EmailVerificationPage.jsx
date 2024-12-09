@@ -73,7 +73,7 @@ const EmailVerificationPage = () => {
 				className="bg-gray-100 bg-opacity-60 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-full max-w-md"
 			>
 				<h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-rose-500 to-red-600 text-transparent bg-clip-text">
-					आफ्नो इमेल प्रमाणीकरण
+					इमेल प्रमाणीकरण
 				</h2>
 				<p className="text-center text-gray-600 mb-6">
 					तपाईंको इमेल ठेगानामा पठाइएको ६ अङ्कको कोड प्रविष्ट गर्नुहोस्

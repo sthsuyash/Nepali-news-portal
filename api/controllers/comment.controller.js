@@ -53,6 +53,7 @@ export const getCommentsByPost = async (req, res) => {
                 updatedAt: true,
                 user: {
                     select: {
+                        id: true,
                         name: true,
                         email: true,
                     },
@@ -275,12 +276,14 @@ export const getAllComments = async (req, res) => {
                 },
                 user: {
                     select: {
-                        id: true, name: true, email: true,
+                        id: true,
+                        name: true,
+                        email: true,
                         role: {
                             select: {
                                 name: true
                             }
-                        }
+                        },
                     }
                 }
             }

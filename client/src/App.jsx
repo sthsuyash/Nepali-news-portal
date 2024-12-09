@@ -1,6 +1,14 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { useAuthStore } from "./store/authStore";
+import { useEffect } from "react";
 
-import ErrorPage from "./pages/ErrorPage";
+import {Navigate, Route, Routes } from "react-router-dom";
+import {
+	ProtectedRoute,
+	AdminProtectedRoute,
+	RedirectAuthenticatedUser
+} from "./components/Public/Auth/AuthRoutes";
+
 // Public Pages
 import HomePage from "./pages/HomePage";
 import NewsDetailsPage from "./pages/News/NewsDetailsPage";
@@ -16,200 +24,96 @@ import ResetPasswordPage from "./pages/Auth/ResetPasswordPage";
 import ResendVerificationEmailPage from "./pages/Auth/ResendVerificationEmailPage";
 
 // Private User Pages
-import DashboardPage from "./pages/User/DashboardPage";
+import DashboardLayout from "./pages/User/DashboardLayout";
+import ProfilePage from "./pages/User/ProfilePage";
+import EditProfilePage from "./pages/User/EditProfilePage";
+import ChangePasswordPage from "./pages/User/ChangePasswordPage";
 
-// Private Admin Pages
+// Admin Pages
 import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
 
-import { Toaster } from "react-hot-toast";
-import { useAuthStore } from "./store/authStore";
-import { useEffect } from "react";
+// Error and Other Pages
+import ErrorPage from "./pages/ErrorPage";
 import LoadingSpinner from "./components/Public/Auth/LoadingSpinner";
-
-// Universal Components
 import Header from "./components/Public/Header/Header";
 import Footer from "./components/Public/Footer/Footer";
 import SecondaryHeader from "./components/Public/Header/HeaderCategory/SecondaryHeader";
 
-// protect routes that require authentication
-const ProtectedRoute = ({ children }) => {
-	const { isAuthenticated, user } = useAuthStore();
-
-	if (!isAuthenticated) {
-		return <Navigate to='/login' replace />;
-	}
-
-	if (!user.isVerified) {
-		return <Navigate to='/verify-email' replace />;
-	}
-
-	return children;
-};
-
-// redirect authenticated users to the home page
-const RedirectAuthenticatedUser = ({ children }) => {
-	const { isAuthenticated, user } = useAuthStore();
-
-	// if admin is authenticated, redirect to admin dashboard
-	if (isAuthenticated && user.role.name === "ADMIN") {
-		return <Navigate to='/admin' replace />;
-	}
-
-	if (isAuthenticated && user.isVerified && user.role.name === "USER") {
-		return <Navigate to='/dashboard' replace />;
-	}
-
-	// if (isAuthenticated && !user.isVerified && user.role.name === "USER") {
-	// 	return <Navigate to='/verify-email' replace />;
-	// }
-
-	return children;
-};
-
-// admin protected route
-const AdminProtectedRoute = ({ children }) => {
-	const { user } = useAuthStore();
-
-	if (!user.role.name === "ADMIN") {
-		return <Navigate to='/login' replace />;
-	}
-
-	return children;
-};
-
 function App() {
-	const { isCheckingAuth, checkAuth } = useAuthStore();
+  const { isCheckingAuth, checkAuth } = useAuthStore();
 
-	useEffect(() => {
-		checkAuth();
-	}, [checkAuth]);
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
-	if (isCheckingAuth) return <LoadingSpinner />;
+  if (isCheckingAuth) return <LoadingSpinner />;
 
-	return (
-		<div>
-			<Header />
-			<SecondaryHeader />
-			<Routes>
-				{/* Public Routes */}
-				<Route path='/' element={<HomePage />} />
+  return (
+    <div>
+      <Header />
+      <SecondaryHeader />
 
-				<Route
-					path='/news/:slug'
-					element={
-						<NewsDetailsPage />
-					}
-				/>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/news/:slug" element={<NewsDetailsPage />} />
+        <Route path="/category/:category" element={<IndividualCategoryPage />} />
+        <Route path="/search/:query" element={<SearchPage />} />
 
-				<Route
-					path='/category/:category'
-					element={
-						<IndividualCategoryPage />
-					}
-				/>
+        {/* Auth Routes */}
+        <Route
+          path="/signup"
+          element={
+            <RedirectAuthenticatedUser>
+              <SignUpPage />
+            </RedirectAuthenticatedUser>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <RedirectAuthenticatedUser>
+              <LoginPage />
+            </RedirectAuthenticatedUser>
+          }
+        />
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
+        <Route path="/resend-verification-code" element={<ResendVerificationEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-				<Route
-					path='/search/:query'
-					element={
-						<SearchPage />
-					}
-				/>
+        {/* User Dashboard Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ProfilePage />} />
+          <Route path="edit" element={<EditProfilePage />} />
+          <Route path="change-password" element={<ChangePasswordPage />} />
+        </Route>
 
+        {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminDashboardPage />
+            </AdminProtectedRoute>
+          }
+        />
 
-
-				{/* Auth Routes */}
-				<Route
-					path='/signup'
-					element={
-						<RedirectAuthenticatedUser>
-							<SignUpPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				<Route
-					path='/login'
-					element={
-						<RedirectAuthenticatedUser>
-							<LoginPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				<Route
-					path='/verify-email'
-					element={
-						<RedirectAuthenticatedUser>
-							<EmailVerificationPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				<Route
-					path='/resend-verification-code'
-					element={
-						<RedirectAuthenticatedUser>
-							<ResendVerificationEmailPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				<Route
-					path='/forgot-password'
-					element={
-						<RedirectAuthenticatedUser>
-							<ForgotPasswordPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-
-				<Route
-					path='/reset-password/:token'
-					element={
-						<RedirectAuthenticatedUser>
-							<ResetPasswordPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-
-				{/* User Routes */}
-				<Route
-					path='/dashboard'
-					element={
-						<ProtectedRoute>
-							<DashboardPage />
-						</ProtectedRoute>
-					}
-				/>
-
-				{/* Admin Routes */}
-				<Route
-					path='/admin'
-					element={
-						<ProtectedRoute>
-							<AdminProtectedRoute>
-								<AdminDashboardPage />
-							</AdminProtectedRoute>
-						</ProtectedRoute>
-					}
-				/>
-
-				<Route
-					path='/error'
-					element={
-						<ErrorPage />
-					}
-				/>
-
-				{/* catch all routes */}
-				<Route
-					path='*'
-					element={
-						<Navigate to='/error' replace />
-					}
-				/>
-			</Routes>
-			
-			<Toaster />
-			<Footer />
-		</div>
-	);
+        {/* Error Routes */}
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="*" element={<Navigate to="/error" replace />} />
+      </Routes>
+<Toaster />
+      <Footer />
+    </div>
+  );
 }
 
 export default App;

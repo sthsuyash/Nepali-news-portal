@@ -11,7 +11,7 @@ import RelatedNews from "../../components/Public/News/RelatedNews";
 import RecentNews from "../../components/Public/News/RecentNews.jsx";
 
 import toast from 'react-hot-toast';  // Import react-hot-toast for notifications
-import { TrashIcon, SendHorizonal } from "lucide-react";
+import { TrashIcon, SendHorizonal, Edit2 } from "lucide-react";
 
 import { BASE_API_URL } from "../../config/index.js";
 
@@ -31,7 +31,6 @@ const NewsDetailsPage = () => {
         // Fetch news data
         const res = await fetch(`${BASE_API_URL}/posts/${slug}`);
         const data = await res.json();
-        console.log(data.data);
         setNews(data.data);
 
         // Fetch related news
@@ -40,12 +39,12 @@ const NewsDetailsPage = () => {
           const relatedData = await relatedRes.json();
           setRelatedNews(relatedData.data || []);
         }
-
+        
         // Fetch comments
         if (data.data?.id) {
           const commentsRes = await fetch(`${BASE_API_URL}/comments/${data.data.id}`);
           const commentsData = await commentsRes.json();
-          setComments(commentsData.data || []);
+          setComments(commentsData.data.comments || []);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -94,6 +93,35 @@ const NewsDetailsPage = () => {
       console.error("Error submitting comment:", error);
       toast.error("Error submitting comment");
     }
+  };
+
+  // Handle comment deletion
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      try {
+        const res = await fetch(`${BASE_API_URL}/comments/${commentId}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          setComments((prevComments) =>
+            prevComments.filter((comment) => comment.id !== commentId)
+          );
+          toast.success("Comment deleted successfully!");
+        } else {
+          toast.error("Failed to delete comment");
+        }
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+        toast.error("Error deleting the comment");
+      }
+    }
+  };
+
+  // Handle comment editing (Placeholder for actual implementation)
+  const handleEditComment = (commentId) => {
+    // Placeholder: You can implement an actual edit functionality here
+    toast.success(`Editing comment with ID: ${commentId}`);
   };
 
   const handleDelete = async () => {
@@ -155,6 +183,46 @@ const NewsDetailsPage = () => {
                     <div>{parser(news?.description)}</div>
                   </div>
                 </div>
+<div className="mt-8">
+            {comments.length === 0 ? (
+              <div>No comments yet.</div>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.id} className="p-4 w-2/3 bg-white mb-4 rounded-md shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-gray-800">{comment.user?.name || "Anonymous"}</p>
+                      <p className="text-gray-600">{comment.content}</p>
+                      <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
+                    </div>
+
+                    {/* Delete and Edit buttons for the comment owner or admin */}
+                    {(isAuthenticated && user?.name === comment.user?.name) || user?.role === "ADMIN" ? (
+                      <div className="flex space-x-2">
+                        {user?.name === comment.user?.name && (
+                          <button
+                            onClick={() => handleEditComment(comment.id)}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                            title="Edit Comment"
+                          >
+                            <Edit2 />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                          title="Delete Comment"
+                        >
+                          <TrashIcon />
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ))
+                  )}
+                  </div>
+
               </div>
             </div>
             <div className="w-full xl:w-4/12">
@@ -173,128 +241,58 @@ const NewsDetailsPage = () => {
             <RelatedNews news={relatedNews} type="Related news" />
           </div>
 
-          {/* Comments Section */}
+          {/* Comments Section - moved below the post */}
           <div className="pt-8">
-  <h3 className="text-xl font-semibold mb-4">Comments</h3>
+            <h3 className="text-xl font-semibold mb-4">Comments</h3>
 
-  {/* Display existing comments */}
-  {comments.length === 0 ? (
-    <div>No comments yet.</div>
-  ) : (
-    comments.map((comment, index) => (
-      <div key={index} className="p-4 w-2/3 bg-white mb-4 rounded-md shadow-sm">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="font-medium text-gray-800">{comment.userName || "Anonymous"}</p>
-            <p className="text-gray-600">{comment.comment}</p>
-            <span className="text-xs text-gray-500">{comment.createdAt}</span>
+            
+
+            {/* Comment input form */}
+            {isAuthenticated ? (
+              <form onSubmit={handleCommentSubmit} className="relative mt-4 w-2/3">
+                <div className="relative">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Write a comment..."
+                    rows="3"
+                    className="w-full p-2 border border-gray-300 rounded-md pr-12 resize-none"
+                    style={{ paddingRight: "3rem" }}
+                  ></textarea>
+                  <button
+                    type="submit"
+                    className="absolute right-2 bottom-2 bg-red-600 text-white p-2 mb-1 rounded-full hover:bg-red-700 h-8 w-8 flex items-center justify-center"
+                    title="Post Comment"
+                  >
+                    <SendHorizonal />
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="mt-4">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Write a comment..."
+                  rows="3"
+                  className="w-2/3 p-2 border border-gray-300 rounded-md resize-none"
+                ></textarea>
+                <p className="text-gray-600 text-sm mt-2">Log in to post a comment.</p>
+              </div>
+            )}
           </div>
-          {/* Delete button for users who own the comment */}
-          {isAuthenticated && user?.name === comment.userName && (
-            <button
-              onClick={() => {
-                if (window.confirm("Are you sure you want to delete this comment?")) {
-                  setComments((prevComments) =>
-                    prevComments.filter((_, i) => i !== index)
-                  );
-                  toast.success("Comment deleted successfully!");
-                }
-              }}
-              className="text-red-600 hover:text-red-800 text-sm"
-              title="Delete Comment"
-            >
-              <TrashIcon />
-            </button>
-          )}
+
           {/* Delete button for admin */}
           {user?.role === "ADMIN" && (
-            <button
-              onClick={() => {
-                if (window.confirm("Are you sure you want to delete this comment?")) {
-                  setComments((prevComments) =>
-                    prevComments.filter((_, i) => i !== index)
-                  );
-                  toast.success("Comment deleted successfully!");
-                }
-              }}
-              className="text-red-600 hover:text-red-800 text-sm" 
-              title="Delete Comment"
-            >
-              <TrashIcon />
-            </button>
+            <div className="pt-4">
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 text-white py-2 px-4 rounded-md"
+              >
+                Delete News
+              </button>
+            </div>
           )}
-        </div>
-      </div>
-    ))
-  )}
-
-  {/* Comment input form */}
-  {isAuthenticated ? (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!newComment.trim()) {
-          toast.error("Comment cannot be empty");
-          return;
-        }
-
-        // Simulate adding the comment locally
-        const newCommentObj = {
-          userName: user?.name,
-          comment: newComment,
-          createdAt: new Date().toLocaleString(),
-        };
-
-        setComments((prevComments) => [...prevComments, newCommentObj]);
-        setNewComment(""); // Reset comment input
-        toast.success("Comment added successfully!");
-      }}
-      className="relative mt-4 w-2/3"
-    >
-      <div className="relative">
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
-          rows="3"
-          className="w-full p-2 border border-gray-300 rounded-md pr-12 resize-none"
-          style={{ paddingRight: "3rem" }}
-        ></textarea>
-        <button
-          type="submit"
-          className="absolute right-2 bottom-2 bg-red-600 text-white p-2 mb-1 rounded-full hover:bg-red-700 h-8 w-8 flex items-center justify-center"
-          title="Post Comment"
-        >
-          <SendHorizonal />
-        </button>
-      </div>
-    </form>
-  ) : (
-    <div className="mt-4">
-      <textarea
-        value={newComment}
-        onChange={(e) => setNewComment(e.target.value)}
-        placeholder="Write a comment..."
-        rows="3"
-        className="w-2/3 p-2 border border-gray-300 rounded-md resize-none"
-      ></textarea>
-      <p className="text-gray-600 text-sm mt-2">Log in to post a comment.</p>
-    </div>
-  )}
-</div>
-
-{/* Delete button for admin */}
-{user?.role === "ADMIN" && (
-  <div className="pt-4">
-    <button
-      onClick={handleDelete}
-      className="bg-red-600 text-white py-2 px-4 rounded-md"
-    >
-      Delete News
-    </button>
-  </div>
-)}
-
         </div>
       </div>
     </div>

@@ -19,7 +19,7 @@ const Footer = () => {
               विश्व, सूचना प्रविधि तथा जीवनका विभिन्न आयामका समाचार र विश्लेषणलाई समेट्छ।
             </p>
             <br />
-            <a href="/about-us" className="text-blue-600 hover:underline text-sm">पूरा पढ्नुहोस् »</a>
+            <a href="/about-us" className="text-red-600 hover:underline text-sm">पूरा पढ्नुहोस् »</a>
           </div>
 
           {/* Useful Links Section */}
@@ -43,6 +43,8 @@ const Footer = () => {
             </address>
           </div>
         </div>
+
+        <hr className='my-8 bg-gray-700 border-1' />
 
         {/* Social Media Links */}
         <div className="flex space-x-6 mt-6 justify-center">
@@ -77,20 +79,19 @@ const Footer = () => {
             />
           </a>
         </div>
-
-        <hr className='my-8 bg-gray-200 border-0 dark:bg-gray-700' />
+        <hr className='my-8 bg-gray-700 border-1' />
 
         {/* Copyright section */}
         <div className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
           &copy; 2024 Nepali News Portal Pvt. Ltd. All Rights Reserved.
           <br />
-          Developed by <a href="https://www.suyashshrestha.com.np" className="text-blue-500 hover:text-blue-700">Suyash Shrestha</a> | <a href="https://github.com/amishb7" className="text-blue-500 hover:text-blue-700">Amish Bajracharya</a> | <a href="https://github.com/prashannastha7" className="text-blue-500 hover:text-blue-700">Prashanna B. Shrestha</a>
+          Developed by <a href="https://www.suyashshrestha.com.np" className="text-red-500 hover:text-red-700">Suyash Shrestha</a> | <a href="https://github.com/amishb7" className="text-red-500 hover:text-red-700">Amish Bajracharya</a> | <a href="https://github.com/prashannastha7" className="text-red-500 hover:text-red-700">Prashanna B. Shrestha</a>
           <br />
-          <a href="/privacy-policy" className="text-blue-500 hover:text-blue-700">Privacy Policy</a> | <a href="/terms-of-use" className="text-blue-500 hover:text-blue-700">Terms of Use</a>
+          <a href="/privacy-policy" className="text-red-500 hover:text-red-700">Privacy Policy</a> | <a href="/terms-of-use" className="text-red-500 hover:text-red-700">Terms of Use</a>
           <br />
-          <a href="/cookie-policy" className="text-blue-500 hover:text-blue-700">Cookie Policy</a> | <a href="/contact" className="text-blue-500 hover:text-blue-700">Contact Us</a>
+          <a href="/cookie-policy" className="text-red-500 hover:text-red-700">Cookie Policy</a> | <a href="/contact" className="text-red-500 hover:text-red-700">Contact Us</a>
           <br />
-          <a href="/advertise" className="text-blue-500 hover:text-blue-700">Advertise</a>
+          <a href="/advertise" className="text-red-500 hover:text-red-700">Advertise</a>
         </div>
       </div>
     </footer>

@@ -55,7 +55,7 @@ const UserMenu = ({ show, toggleUserMenu }) => {
                         onClick={toggleDropdown}  // Toggle user menu visibility
                     >
                         {/* Avatar Circle with User Initials */}
-                        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
+                        <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white">
                             {user?.name ? getUserInitials(user.name) : 'U'}
                         </div>
                     </button>
@@ -64,13 +64,19 @@ const UserMenu = ({ show, toggleUserMenu }) => {
                     {dropdownOpen && (
                         <div className="absolute right-0 mt-2 w-48 z-50 bg-white shadow-md rounded-md">
                             <button
-                                className="block w-full px-4 py-2 text-left hover:bg-gray-200"
+                                className="block w-full px-4 py-2 text-left hover:bg-gray-200 rounded-t-md" 
                                 onClick={handleRedirect}  // Redirect based on the user's role
                             >
                                 {user?.role === 'ADMIN' ? 'Admin Panel' : 'Dashboard'}
                             </button>
                             <button
                                 className="block w-full px-4 py-2 text-left hover:bg-gray-200"
+                                onClick={() => navigate('/bookmarks')}
+                            >
+                                Bookmarks
+                            </button>
+                            <button
+                                className="block w-full px-4 py-2 text-left hover:bg-gray-200 rounded-b-md"
                                 onClick={handleLogout}
                             >
                                 Logout
@@ -91,3 +97,5 @@ const UserMenu = ({ show, toggleUserMenu }) => {
 };
 
 export default UserMenu;
+
+

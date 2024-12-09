@@ -38,3 +38,5 @@ const SearchBar = ({ show, toggleSearchBar }) => {
 };
 
 export default SearchBar;
+
+
