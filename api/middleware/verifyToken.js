@@ -63,7 +63,6 @@ export const verifyToken = (req, res, next) => {
  * @returns {void}
  */
 export const isAdmin = (req, res, next) => {
-	console.log(req.userRole);
 	// Check if the user has the 'admin' role
 	if (req.userRole !== "ADMIN") {
 		const response = createResponse(

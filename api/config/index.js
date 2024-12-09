@@ -29,4 +29,7 @@ export const config = {
         password: process.env.ADMIN_PASSWORD,
         name: process.env.ADMIN_NAME,
     },
+    newsAlgorithm: {
+        apiURL: process.env.NEWS_ALGORITHM_API_URL,
+    },
 };

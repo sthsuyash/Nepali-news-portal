@@ -39,7 +39,11 @@ export const getCategoryList = async (req, res) => {
     }
 };
 
-
+/**
+ * Fetches top posts by category with pagination.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ */
 export const getTopPostsByCategory = async (req, res) => {
     const { categoryName } = req.params;
     let {
@@ -79,6 +83,11 @@ export const getTopPostsByCategory = async (req, res) => {
     }
 }
 
+/**
+ * Fetches posts by category with pagination.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ */
 export const getPostsByCategory = async (req, res) => {
     const { categoryName } = req.params;
     const {
@@ -118,13 +127,23 @@ export const getPostsByCategory = async (req, res) => {
 
 
 /** Admin dashboard routes */
+
+/**
+ * Fetches all categories with pagination for admin dashboard.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
 export const getCategoryListForAdmin = async (req, res) => {
-    const {
+    let {
         page = 1,
         limit = 10,
         sortBy = "name",
         order = "asc"
     } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
 
     try {
         const total = await prisma.category.count();
@@ -134,6 +153,13 @@ export const getCategoryListForAdmin = async (req, res) => {
             orderBy: {
                 [sortBy]: order
             },
+            include: {
+                _count: {
+                    select: {
+                        posts: true
+                    }
+                }
+            }
         });
 
         const pagination = paginate(total, categories.length, page, limit, ADMIN_URL);
@@ -156,14 +182,23 @@ export const getCategoryListForAdmin = async (req, res) => {
     }
 };
 
+/**
+ * Creates a new category.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
 export const createCategory = async (req, res) => {
     try {
         const { name, nepaliName } = req.body;
 
         // check if category already exists
-        const existingCategory = await prisma.category.findUnique({
+        const existingCategory = await prisma.category.findFirst({
             where: {
-                name
+                OR: [
+                    { name },
+                    { nepaliName }
+                ]
             }
         });
 
@@ -194,20 +229,55 @@ export const createCategory = async (req, res) => {
     }
 }
 
+/**
+ * Fetches a category details by ID.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
+export const getCategoryById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const category = await prisma.category.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "Category fetched successfully.",
+            category
+        ));
+    } catch (error) {
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
+    }
+};
+
+/**
+ * Updates a category by ID.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
 export const editCategory = async (req, res) => {
     const { id } = req.params;
-    const { name, nepaliName } = req.body;
-
-    const dataToUpdate = {};
-    if (name) { data.name = name; }
-    if (nepaliName) { data.nepaliName = nepaliName; }
+    const data = req.body;
 
     try {
         const category = await prisma.category.update({
             where: {
                 id: parseInt(id)
             },
-            data: dataToUpdate
+            data: {
+                ...data
+            }
         });
 
         res.status(200).json(createResponse(
@@ -225,6 +295,12 @@ export const editCategory = async (req, res) => {
     }
 }
 
+/**
+ * Deletes a category by ID.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
 export const deleteCategory = async (req, res) => {
     const { id } = req.params;
 

@@ -284,7 +284,9 @@ export const resetPassword = async (req, res) => {
 
 		// Find user by email extracted from the token
 		const user = await prisma.user.findUnique({
-			where: { email: decoded.email },
+			where: {
+				email: decoded.email
+			},
 		});
 
 		if (!user) {

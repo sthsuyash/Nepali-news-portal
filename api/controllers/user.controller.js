@@ -14,12 +14,34 @@ const ADMIN_URL = USER_URL + "/admin";
 
 /**  User Specific Controller **/
 
+/**
+ * Get details of the logged-in user
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const getUserDetails = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
-            where: { id: req.userId },
-            include: { role: true },
-
+            where: {
+                id: req.userId
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                phone: true,
+                role: { select: { name: true } },
+                isVerified: true,
+                lastLogin: true,
+                createdAt: true,
+                updatedAt: true,
+                _count: {
+                    select: {
+                        comments: true
+                    },
+                }
+            },
         });
 
         if (!user) {
@@ -35,7 +57,7 @@ export const getUserDetails = async (req, res) => {
             email: user.email,
             name: user.name,
             phone: user.phone,
-            role: { name: user.role.name }, 
+            role: { name: user.role.name },
             isVerified: user.isVerified,
             lastLogin: user.lastLogin,
             createdAt: user.createdAt,
@@ -92,46 +114,96 @@ export const updateUserDetails = async (req, res) => {
     }
 };
 
+/**
+ * Change password for logged-in user
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     try {
-        const user = await prisma.user.findUnique({ where: { id: req.userId } });
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.userId
+            }
+        });
 
         if (!user) {
-            return res.status(400).json(createResponse(false, 400, "User not found"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User not found"
+            ));
         }
 
         const isOldPasswordValid = await bcryptjs.compare(oldPassword, user.password);
         if (!isOldPasswordValid) {
-            return res.status(400).json(createResponse(false, 400, "Old password is incorrect"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "Old password is incorrect"
+            ));
         }
 
         const hashedPassword = await bcryptjs.hash(newPassword, 10);
 
         await prisma.user.update({
-            where: { id: req.userId },
-            data: { password: hashedPassword },
+            where: {
+                id: req.userId
+            },
+            data: {
+                password: hashedPassword
+            },
         });
 
         await sendResetSuccessEmail(user.email);
 
-        res.status(200).json(createResponse(true, 200, "Password updated successfully"));
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "Password updated successfully"
+        ));
     } catch (error) {
         console.error("Error in changePassword", error);
-        res.status(500).json(createResponse(false, 500, error.message));
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
     }
 };
 
+/**
+ * Delete logged-in user
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const deleteSelf = async (req, res) => {
     try {
-        await prisma.user.delete({ where: { id: req.userId } });
+        await prisma.user.delete({
+            where: {
+                id: req.userId
+            }
+        });
 
         res.clearCookie("token");
-        res.status(200).json(createResponse(true, 200, "User deleted successfully"));
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "User deleted successfully"
+        ));
     } catch (error) {
         console.error("Error in deleteSelf", error);
-        res.status(500).json(createResponse(false, 500, error.message));
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
     }
 };
 
@@ -143,32 +215,39 @@ export const deleteSelf = async (req, res) => {
  * @param {Object} res - The response object
  */
 export const getAllUsers = async (req, res) => {
-    const {
+    let {
         page = 1,
         limit = 10,
         sortBy = "createdAt",
         order = "desc",
     } = req.query;
 
+    page = parseInt(page);
+    limit = parseInt(limit);
+
     try {
-        // Fetch total number of users for pagination metadata
-        const total = await prisma.user.count();  // Get the total count of users
+        const total = await prisma.user.count();
         const users = await prisma.user.findMany({
-            skip: (page - 1) * limit,  // Skip items for pagination
-            take: limit,               // Limit the number of items per page
+            skip: (page - 1) * limit,
+            take: limit,
             orderBy: {
-                [sortBy]: order,       // Sorting based on query params
+                [sortBy]: order,
             },
+
             select: {
                 id: true,
                 email: true,
                 name: true,
-                phone: true,
                 role: { select: { name: true } },
                 isVerified: true,
                 lastLogin: true,
                 createdAt: true,
                 updatedAt: true,
+                _count: {
+                    select: {
+                        comments: true
+                    },
+                }
             },
         });
 
@@ -189,14 +268,19 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
-
+/**
+ * Get a user by ID
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const getUserById = async (req, res) => {
     const { userId } = req.params;
 
     try {
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { 
+            select: {
                 id: true,
                 email: true,
                 name: true,
@@ -206,20 +290,44 @@ export const getUserById = async (req, res) => {
                 lastLogin: true,
                 createdAt: true,
                 updatedAt: true,
+                _count: {
+                    select: {
+                        comments: true
+                    },
+                },
             },
         });
 
         if (!user) {
-            return res.status(400).json(createResponse(false, 400, "User not found"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User not found"
+            ));
         }
 
-        res.status(200).json(createResponse(true, 200, "User fetched successfully", user));
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "User fetched successfully",
+            user
+        ));
     } catch (error) {
         console.error("Error in getUserById", error);
-        res.status(500).json(createResponse(false, 500, error.message));
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
     }
 };
 
+/**
+ * Update a user's role
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const updateUserRole = async (req, res) => {
     const { userId } = req.params;
     const { role } = req.body;
@@ -273,29 +381,37 @@ export const updateUserRole = async (req, res) => {
     }
 };
 
-export const updateUserDetailsByAdmin = async (req, res) => {
+/**
+ * Update a user's details by an admin by userId
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
+export const updateUserDetailsById = async (req, res) => {
     const { userId } = req.params;
-    const { email, name, phone, password } = req.body;
+    const data = req.body;
 
     try {
-        const dataToUpdate = {};
-        if (email) dataToUpdate.email = email;
-        if (name) dataToUpdate.name = name;
-        if (phone) dataToUpdate.phone = phone;
-        if (password) {
-            const hashedPassword = await bcryptjs.hash(password, 10);
-            dataToUpdate.password = hashedPassword;
-        }
-
-        const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
 
         if (!existingUser) {
-            return res.status(400).json(createResponse(false, 400, "User not found"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User not found"
+            ));
         }
 
         const user = await prisma.user.update({
-            where: { id: userId },
-            data: dataToUpdate,
+            where: {
+                id: userId
+            },
+            data: data,
             include: { role: true },
         });
 
@@ -323,39 +439,81 @@ export const updateUserDetailsByAdmin = async (req, res) => {
     }
 };
 
-
-export const deleteUser = async (req, res) => {
+/**
+ * Delete a user by an admin
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ */
+export const deleteUserById = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // check if the user exists
-        const userExists = await prisma.user.findUnique({ where: { id: userId } });
+        const userExists = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
 
         if (!userExists) {
-            return res.status(400).json(createResponse(false, 400, "User not found"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User not found"
+            ));
         }
 
-        await prisma.user.delete({ where: { id: userId } });
+        await prisma.user.delete({
+            where: {
+                id: userId
+            }
+        });
 
-        res.status(200).json(createResponse(true, 200, "User deleted successfully"));
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "User deleted successfully"
+        ));
     } catch (error) {
         console.error("Error in deleteUser", error);
-        res.status(500).json(createResponse(false, 500, error.message));
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
     }
 };
 
+/**
+ * Approve a user's email by an admin
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const approveUserEmail = async (req, res) => {
     const { userId } = req.params;
-
     try {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
 
         if (!user) {
-            return res.status(400).json(createResponse(false, 400, "User not found"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User not found"
+            ));
         }
 
         if (user.isVerified) {
-            return res.status(400).json(createResponse(false, 400, "User is already verified"));
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User is already verified"
+            ));
         }
 
         const updatedUser = await prisma.user.update({
@@ -376,18 +534,47 @@ export const approveUserEmail = async (req, res) => {
     }
 };
 
+/**
+ * Suspend a user by an admin
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Object} - The response object
+ */
 export const suspendUser = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const user = await prisma.user.update({
-            where: { id: userId },
-            data: { isSuspended: true },
+        const userExists = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
         });
 
-        res.status(200).json(createResponse(true, 200, "User suspended successfully"));
+        if (!userExists) {
+            return res.status(400).json(createResponse(
+                false,
+                400,
+                "User not found"
+            ));
+        }
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: { isVerified: false },
+        });
+
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "User suspended successfully"
+        ));
     } catch (error) {
         console.error("Error in suspendUser", error);
-        res.status(500).json(createResponse(false, 500, error.message));
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
     }
 };

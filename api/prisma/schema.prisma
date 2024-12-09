@@ -23,7 +23,7 @@ model User {
   isVerified Boolean  @default(false)
 
   roleId Int
-  role   Role @relation(fields: [roleId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   verificationToken          String?
   verificationTokenExpiresAt DateTime?
@@ -56,15 +56,15 @@ model Post {
   visitCount  Int        @default(0)
 
   categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   comments Comment[]
 
   sentimentId Int
-  sentiment   Sentiment @relation(fields: [sentimentId], references: [id])
+  sentiment   Sentiment @relation(fields: [sentimentId], references: [id], onDelete: Cascade)
 
   bookmarks Bookmark[]
   createdAt DateTime   @default(now())
@@ -78,10 +78,10 @@ model Comment {
   content String
 
   postId String
-  post   Post   @relation(fields: [postId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -98,8 +98,8 @@ model Bookmark {
   userId String
   postId String
 
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 

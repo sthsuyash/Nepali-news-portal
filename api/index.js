@@ -3,56 +3,70 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import compression from "compression"; // For gzip compression of responses
 
 import routes from "./routes/index.js";
 import { config } from "./config/index.js";
-import { connectDB } from "./db/connectDB.js";
 import { morganConfig } from "./logging/morganConfig.js";
 import { createResponse } from "./utils/responseModel.js";
 
 dotenv.config();
 
-const PORT = config.server.port; // Server port from config
-const NODE_ENV = config.server.nodeEnv; // Environment mode (development/production)
-let CLIENT_URL; // Client URL for CORS
+const PORT = config.server.port;
+const NODE_ENV = config.server.nodeEnv;
+let CLIENT_URL;
 
 const app = express();
 const __dirname = path.resolve();
 
-// in development, allow all origins, else allow only the client URL
+// Environment-specific CORS configuration
 if (NODE_ENV === "development") {
-	CLIENT_URL = "*"; // This allows all origins
+	CLIENT_URL = "*"; // Allow all origins in development
 } else {
 	CLIENT_URL = config.server.clientURL;
 }
 
-// Enable CORS for all origins
+// Enable CORS with dynamic configuration based on environment
 app.use(cors({
-	origin: "*", // Allow all origins
+	origin: CLIENT_URL, // Allow client URL origin in production
 	credentials: true, // Allow credentials like cookies
 }));
 
-app.get("/", (req, res) => {
-	res.send("Hello World!");
-});
+// Security middleware (Helmet helps secure HTTP headers)
+app.use(helmet());
 
+// Compression middleware for faster response (gzip)
+app.use(morganConfig);
+app.use(compression());
+
+// Body parsing middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(morganConfig);
+
+// Routes configuration
 app.use("/api/v2/", routes);
 
 // Production environment-specific handling
 if (NODE_ENV === "production") {
+	// Serve static files (e.g., React build)
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
 	/**
 	 * Catch-all route handler for the production environment.
 	 * Returns the index.html file to support client-side routing (e.g., React Router).
-	 * @param {Object} req - The request object.
-	 * @param {Object} res - The response object.
 	 */
 	app.get("*", (req, res) => {
 		res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+	});
+} else {
+	// Development route: Hello World for quick testing
+	app.get("/", (req, res) => {
+		res.json(createResponse(
+			true,
+			200,
+			"Hello World! Welcome to the News Portal API"
+		));
 	});
 }
 
@@ -80,6 +94,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-	// connectDB();
 	console.log(`Server is running on: http://localhost:${PORT}/api/v2`);
 });
