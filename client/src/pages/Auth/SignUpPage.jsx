@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../../components/Public/Auth/PasswordStrengthMeter";
 import { useAuthStore } from "../../store/authStore";
-import toast from "sonner";
+import { toast }  from "sonner";
 
 const SignUpPage = () => {
   const [name, setName] = useState("");

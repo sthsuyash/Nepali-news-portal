@@ -6,7 +6,7 @@ import Galler from '../components/Galler';
 import { base_url } from '../../config/config'
 import axios from 'axios'
 import storeContext from '../../context/storeContext'
-import toast from 'sonner'
+import { toast  from 'sonner'
 
 const CreateNews = () => {
 

@@ -4,7 +4,7 @@ import { useAuthStore } from "../../store/authStore";
 import { useNavigate, useParams } from "react-router-dom";
 import Input from "../../components/Public/Auth/Input";
 import { Lock } from "lucide-react";
-import toast from "sonner";
+import { toast }  from "sonner";
 
 const ResetPasswordPage = () => {
 	const [password, setPassword] = useState("");

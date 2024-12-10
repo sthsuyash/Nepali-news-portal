@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import toast from 'sonner'
+import { toast  from 'sonner'
 import axios from 'axios'
 import { base_url } from '../../config/config'
 import storeContext from '../../context/storeContext'

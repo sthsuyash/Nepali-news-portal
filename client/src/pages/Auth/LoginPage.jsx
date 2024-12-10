@@ -4,7 +4,8 @@ import { Mail, Lock, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import Input from "../../components/Public/Auth/Input";
 import { useAuthStore } from "../../store/authStore";
-import toast from "sonner";
+import { toast }  from "sonner";
+import { toastWithTime } from "../../components/ui/Toaster";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ const LoginPage = () => {
       await login(email, password);
       toast.success("Login successful");
     } catch (error) {
-      toast.error(error.message);
+        toastWithTime("error", error.message);
     }
   };
 
