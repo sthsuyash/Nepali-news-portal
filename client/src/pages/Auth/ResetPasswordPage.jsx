@@ -4,7 +4,7 @@ import { useAuthStore } from "../../store/authStore";
 import { useNavigate, useParams } from "react-router-dom";
 import Input from "../../components/Public/Auth/Input";
 import { Lock } from "lucide-react";
-import { toast }  from "sonner";
+import { toastWithTime } from "../../components/ui/Toaster";
 
 const ResetPasswordPage = () => {
 	const [password, setPassword] = useState("");
@@ -18,18 +18,18 @@ const ResetPasswordPage = () => {
 		e.preventDefault();
 
 		if (password !== confirmPassword) {
-			toast.error("Passwords do not match");
+			toastWithTime("error", "Passwords do not match");
 			return;
 		}
 		try {
 			await resetPassword(token, password);
 
-			toast.success("Password reset successfully, redirecting to login page...");
+			toastWithTime("success", "Password reset successfully, redirecting to login page");
 			setTimeout(() => {
 				navigate("/login");
 			}, 2000);
 		} catch (error) {
-			toast.error(error.message);
+			toastWithTime("error", error.message);
 		}
 	};
 

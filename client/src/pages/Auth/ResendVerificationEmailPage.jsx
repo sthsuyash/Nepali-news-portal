@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../../store/authStore";
-import { toast }  from "sonner";
 import Input from "../../components/Public/Auth/Input";
 import { Loader, Mail } from "lucide-react";
+import { toastWithTime } from "../../components/ui/Toaster";
 
 const ResendVerificationEmailPage = () => {
 	const [email, setEmail] = useState("");
@@ -15,10 +15,10 @@ const ResendVerificationEmailPage = () => {
 		e.preventDefault();
 		try {
 			await resendVerificationEmail(email);
-			toast.success("Verification email has been resent. Please check your inbox.");
+			toastWithTime("success", "Verification email has been resent. Please check your inbox.");
 			navigate("/verify-email");
 		} catch (error) {
-			toast.error(error.message);
+			toastWithTime("error", error.message);
 		}
 	};
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
-import { toast }  from "sonner";
+import { toastWithTime } from "../../components/ui/Toaster";
 import { Link } from "react-router-dom";
 
 const EmailVerificationPage = () => {
@@ -51,9 +51,9 @@ const EmailVerificationPage = () => {
 		try {
 			await verifyEmail(verificationCode);
 			navigate("/");
-			toast.success("Email verified successfully");
+			toastWithTime("success", "Email verified successfully");
 		} catch (error) {
-			toast.error(error.message);
+			toastWithTime("error", error.message);
 		}
 	};
 

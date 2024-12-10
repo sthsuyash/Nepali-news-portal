@@ -10,10 +10,10 @@ import parser from "html-react-parser";
 import RelatedNews from "../../components/Public/News/RelatedNews";
 import RecentNews from "../../components/Public/News/RecentNews.jsx";
 
-import { toast } from "sonner";
 import { TrashIcon, SendHorizonal, Edit2 } from "lucide-react";
 
 import { BASE_API_URL } from "../../config/index.js";
+import { toastWithTime } from "../../components/ui/Toaster.jsx";
 
 const NewsDetailsPage = () => {
   const { slug } = useParams();
@@ -60,12 +60,12 @@ const NewsDetailsPage = () => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      toast.error("You need to log in to comment");
+      toastWithTime("error", "You need to log in to comment");
       return;
     }
 
     if (!newComment.trim()) {
-      toast.error("Comment cannot be empty");
+      toastWithTime("error", "Comment cannot be empty");
       return;
     }
 
@@ -85,13 +85,13 @@ const NewsDetailsPage = () => {
         const data = await res.json();
         setComments((prevComments) => [...prevComments, data.comment]);
         setNewComment("");  // Reset comment input
-        toast.success("Comment submitted successfully!");
+        toastWithTime("success", "Comment submitted successfully!");
       } else {
-        toast.error("Failed to submit comment");
+        toastWithTime("error", "Failed to submit comment");
       }
     } catch (error) {
       console.error("Error submitting comment:", error);
-      toast.error("Error submitting comment");
+      toastWithTime("error", "Error submitting comment");
     }
   };
 
@@ -107,13 +107,13 @@ const NewsDetailsPage = () => {
           setComments((prevComments) =>
             prevComments.filter((comment) => comment.id !== commentId)
           );
-          toast.success("Comment deleted successfully!");
+          toastWithTime("success", "Comment deleted successfully!");
         } else {
-          toast.error("Failed to delete comment");
+          toastWithTime("error", "Failed to delete comment");
         }
       } catch (error) {
         console.error("Error deleting comment:", error);
-        toast.error("Error deleting the comment");
+        toastWithTime("error", "Error deleting comment");
       }
     }
   };
@@ -121,7 +121,7 @@ const NewsDetailsPage = () => {
   // Handle comment editing (Placeholder for actual implementation)
   const handleEditComment = (commentId) => {
     // Placeholder: You can implement an actual edit functionality here
-    toast.success(`Editing comment with ID: ${commentId}`);
+    toastWithTime("info", "Editing comment is not implemented yet");
   };
 
   const handleDelete = async () => {

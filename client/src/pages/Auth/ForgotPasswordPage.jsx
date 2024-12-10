@@ -4,7 +4,7 @@ import { useAuthStore } from "../../store/authStore";
 import Input from "../../components/Public/Auth/Input";
 import { ArrowLeft, Loader, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast }  from "sonner";
+import { toastWithTime } from "../../components/ui/Toaster";
 
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState("");
@@ -18,8 +18,8 @@ const ForgotPasswordPage = () => {
             await forgotPassword(email);
             setIsSubmitted(true);
         } catch (error) {
-            toast.error(error.message);
             console.error(error);
+            toastWithTime("error", error.message);
         }
     };
 

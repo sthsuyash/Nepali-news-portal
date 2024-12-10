@@ -4,7 +4,6 @@ import { Mail, Lock, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import Input from "../../components/Public/Auth/Input";
 import { useAuthStore } from "../../store/authStore";
-import { toast }  from "sonner";
 import { toastWithTime } from "../../components/ui/Toaster";
 
 const LoginPage = () => {
@@ -18,13 +17,13 @@ const LoginPage = () => {
 
     // check if email and password are provided
     if (!email || !password) {
-      toast.error("Both fields are required");
+      toastWithTime("error", "Both fields are required");
       return;
     }
 
     try {
       await login(email, password);
-      toast.success("Login successful");
+      toastWithTime("success", "Login successful");
     } catch (error) {
         toastWithTime("error", error.message);
     }

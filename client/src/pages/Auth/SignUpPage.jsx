@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../../components/Public/Auth/PasswordStrengthMeter";
 import { useAuthStore } from "../../store/authStore";
-import { toast }  from "sonner";
+import { toastWithTime } from "../../components/ui/Toaster";
 
 const SignUpPage = () => {
   const [name, setName] = useState("");
@@ -22,7 +22,7 @@ const SignUpPage = () => {
       await signup(email, password, name);
       navigate("/verify-email");
     } catch (error) {
-      toast.error(error.message);
+      toastWithTime("error", error.message);
     }
   };
 
