@@ -28,7 +28,13 @@ const UserMenu = ({ show, toggleUserMenu }) => {
         }
         setDropdownOpen(false); // Close the dropdown after redirect
     };
-
+    const handleLogin = () => {
+        const currentPath = window.location.pathname; // Get the current path
+        localStorage.setItem('redirectPath', currentPath); // Store it in localStorage
+        navigate('/login');
+        setDropdownOpen(false);
+    };
+    
     // Close dropdown when clicking outside of it
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -87,7 +93,7 @@ const UserMenu = ({ show, toggleUserMenu }) => {
             ) : (
                 <button
                     className="login-btn-new flex items-center space-x-2"
-                    onClick={() => navigate('/login')}
+                    onClick={handleLogin}
                 >
                     <span>लगइन</span>
                 </button>

@@ -1,33 +1,39 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import Input from "../../components/Public/Auth/Input";
 import { useAuthStore } from "../../store/authStore";
 import { toastWithTime } from "../../components/ui/Toaster";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const { login, isLoading } = useAuthStore();
+  const navigate=useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // check if email and password are provided
     if (!email || !password) {
-      toastWithTime("error", "Both fields are required");
-      return;
+        toastWithTime("error", "Both fields are required");
+        return;
     }
 
     try {
-      await login(email, password);
-      toastWithTime("success", "Login successful");
+        await login(email, password);
+        toastWithTime("success", "Login successful");
+
+        // Redirect to the saved path or default to /dashboard
+        const redirectPath = localStorage.getItem('redirectPath') || '/dashboard';
+        localStorage.removeItem('redirectPath'); // Clean up after redirect
+        navigate(redirectPath);
     } catch (error) {
         toastWithTime("error", error.message);
     }
-  };
+};
 
   return (
     <div className="py-10 lg:pt-10 flex items-center justify-center bg-gray-100">
