@@ -52,7 +52,9 @@ const LatestNews = ({ news }) => {
                 customButtonGroup={<ButtonGroup />}
                 responsive={responsive}
                 infinite={true}
-                transitionDuration={500}
+                transitionDuration={600}
+                focusOnSelect={true}
+                className='rounded-md'
             >
                 {news.map((item, i) => (
                     <SimpleNewsCard

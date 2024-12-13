@@ -121,6 +121,10 @@ export const getUserBookmarks = async (req, res) => {
                     select: {
                         id: true,
                         title: true,
+                        image: true,
+                        description: true,
+                        createdAt: true,
+                        visitCount: true,
                         slug: true,
                         _count: {
                             select: {
@@ -147,6 +151,48 @@ export const getUserBookmarks = async (req, res) => {
             200,
             "Bookmarks fetched successfully.",
             { pagination, bookmarks }
+        ));
+    } catch (error) {
+        res.status(500).json(createResponse(
+            false,
+            500,
+            error.message
+        ));
+    }
+};
+
+/**
+ * Checks if a post is bookmarked by the logged-in user.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object to send back the response.
+ */
+export const isBookmarked = async (req, res) => {
+    const { postId } = req.params;
+    const userId = req.userId;
+
+    if (!postId) {
+        return res.status(400).json(createResponse(
+            false,
+            400,
+            "Post ID is required."
+        ));
+    }
+
+    try {
+        const bookmark = await prisma.bookmark.findUnique({
+            where: {
+                userId_postId: {
+                    userId,
+                    postId
+                }
+            }
+        });
+
+        res.status(200).json(createResponse(
+            true,
+            200,
+            "Bookmark status fetched successfully.",
+            { isBookmarked: !!bookmark }
         ));
     } catch (error) {
         res.status(500).json(createResponse(
