@@ -21,7 +21,7 @@ const UserMenu = ({ show, toggleUserMenu }) => {
     };
 
     const handleRedirect = () => {
-        if (user?.role === 'ADMIN') {
+        if (user?.role.name === 'ADMIN') {
             navigate('/admin');  // Redirect to admin page if the user is an admin
         } else {
             navigate('/dashboard');  // Otherwise, redirect to the dashboard
@@ -73,7 +73,7 @@ const UserMenu = ({ show, toggleUserMenu }) => {
                                 className="block w-full px-4 py-2 text-left hover:bg-gray-200 rounded-t-md" 
                                 onClick={handleRedirect}  // Redirect based on the user's role
                             >
-                                {user?.role === 'ADMIN' ? 'Admin Panel' : 'Dashboard'}
+                                {user?.role.name === 'ADMIN' ? 'Admin Panel' : 'Dashboard'}
                             </button>
                             <button
                                 className="block w-full px-4 py-2 text-left hover:bg-gray-200"

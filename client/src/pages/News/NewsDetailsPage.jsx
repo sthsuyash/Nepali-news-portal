@@ -10,7 +10,7 @@ import parser from "html-react-parser";
 import RelatedNews from "../../components/Public/News/RelatedNews";
 import RecentNews from "../../components/Public/News/RecentNews.jsx";
 
-import { TrashIcon, Edit2, Bookmark, BookmarkMinus } from "lucide-react";
+import { TrashIcon, Edit2, Bookmark, BookmarkMinus, Loader2 } from "lucide-react";
 
 import { BASE_API_URL } from "../../config/index.js";
 import { toastWithTime } from "../../components/ui/Toaster.jsx";
@@ -29,6 +29,8 @@ const NewsDetailsPage = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false); // State for showing modal
   const [commentToDelete, setCommentToDelete] = useState(null); // Store comment ID to be deleted
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
   const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
@@ -71,7 +73,9 @@ const NewsDetailsPage = () => {
     };
 
     fetchData();
-  }, [slug, isBookmarked]);
+  }, [slug]);
+
+
 
   const getUserInitials = (name) => {
     const nameParts = name?.split(" ") || [];
@@ -141,6 +145,7 @@ const NewsDetailsPage = () => {
   };
 
   const handleBookmark = async () => {
+    setBookmarkLoading(true);
     try {
       const response = await fetch(`${BASE_API_URL}/bookmarks/${news.id}`, {
         method: isBookmarked ? "DELETE" : "POST",
@@ -156,12 +161,16 @@ const NewsDetailsPage = () => {
           "success",
           isBookmarked ? "News removed from bookmarks" : "News bookmarked successfully!"
         );
+        setBookmarkLoading(false);
       } else {
         toastWithTime("error", "Failed to bookmark news.");
       }
     } catch (error) {
       console.error("Error bookmarking news:", error);
       toastWithTime("error", "Error bookmarking news.");
+    }
+    finally {
+      setBookmarkLoading(false);
     }
   };
 
@@ -203,7 +212,7 @@ const NewsDetailsPage = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className=" mt-5 flex justify-center items-center">Loading...</div>;
   }
 
   if (!news) {
@@ -236,11 +245,17 @@ const NewsDetailsPage = () => {
                       <h2 className="text-3xl text-gray-700 font-bold">{news?.title}</h2>
                       <button
                         className="flex items-center gap-x-2 text-xs font-normal text-slate-600 hover:text-red-700"
-                        onClick={handleBookmark} title="Bookmark"
+                        onClick={handleBookmark}
+                        aria-label={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+                        title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
                       >
                         {
-                          isBookmarked? <BookmarkMinus /> : <Bookmark />
-                        }
+                          bookmarkLoading?(
+                            <Loader2 className="animate-spin" />
+                          ):
+                          isBookmarked? (<BookmarkMinus />) :( <Bookmark />
+                
+                        )}
                       </button>
                     </div>
                     <div className="flex gap-x-2 text-xs font-normal text-slate-600">
@@ -322,7 +337,7 @@ const NewsDetailsPage = () => {
                                   />
                                   <button
                                     onClick={() => handleEditComment(comment.id)}
-                                    className="ml-2 bg-blue-600 text-white rounded-full p-2"
+                                    className="ml-2 bg-blue-600 text-white rounded-2xl p-2 w-20 h-10 mt-3 hover:bg-blue-700"
                                     title="Save changes"
                                   >
                                     Save
@@ -335,18 +350,18 @@ const NewsDetailsPage = () => {
                           </div>
 
                           {/* Delete and Edit buttons */}
-                          {(isAuthenticated && (user?.name === comment.user?.name || user?.role === "ADMIN")) ? (
+                          {(isAuthenticated && (user?.name === comment.user?.name || user?.role.name === "ADMIN")) ? (
                             <div className="flex space-x-2">
-                              {(user?.name === comment.user?.name || user?.role === "ADMIN") && (
+                              {(user?.name === comment.user?.name || user?.role.name === "ADMIN") && (
                                 <button
                                   onClick={() => {
                                     setEditingCommentId(comment.id);
                                     setEditedComment(comment.content);
                                   }}
-                                  className="text-blue-600 hover:text-blue-800 text-sm"
+                                  className="text-gray-600 hover:text-gray-800 text-sm"
                                   title="Edit Comment"
                                 >
-                                  <Edit2 />
+                                  <Edit2 size={20}/>
                                 </button>
                               )}
                               <button
@@ -357,7 +372,7 @@ const NewsDetailsPage = () => {
                                 className="text-red-600 hover:text-red-800 text-sm"
                                 title="Delete Comment"
                               >
-                                <TrashIcon />
+                                <TrashIcon size={20}/>
                               </button>
                             </div>
                           ) : null}
