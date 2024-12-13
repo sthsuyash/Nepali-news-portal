@@ -24,6 +24,9 @@ import ResetPasswordPage from "./pages/Auth/ResetPasswordPage";
 import ResendVerificationEmailPage from "./pages/Auth/ResendVerificationEmailPage";
 
 // Private User Pages
+import BookMarksPage from "./pages/User/BookmarksPage"; 
+
+// Private User Dashboard Pages
 import DashboardLayout from "./pages/User/DashboardLayout";
 import ProfilePage from "./pages/User/ProfilePage";
 import EditProfilePage from "./pages/User/EditProfilePage";
@@ -82,6 +85,16 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
+        {/* User Routes */}
+        <Route
+          path="/bookmarks"
+          element={
+            <ProtectedRoute>
+              <BookMarksPage />
+            </ProtectedRoute>
+          }
+        />
+        
         {/* User Dashboard Routes */}
         <Route
           path="/dashboard"

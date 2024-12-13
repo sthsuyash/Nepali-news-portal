@@ -32,8 +32,8 @@ const SimpleDetailsNewCard = ({ news, type, height, sliceLength = 200 }) => {
           {news?.title}
         </Link>
         <div className="flex gap-x-2 text-xs font-normal text-slate-600">
-          <span>{news?.date}</span>
-          <span>{news?.writerName}</span>
+          {/* <span>{news?.createdAt}</span> */}
+          {/* <span>{news?.writerName}</span> */}
         </div>
         {type === "details-news" && (
           <p className="text-sm text-slate-600 pt-3">
