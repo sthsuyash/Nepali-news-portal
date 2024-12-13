@@ -17,7 +17,7 @@ export const getCommentsByPost = async (req, res) => {
     const { postId } = req.params;
     let {
         page = 1,
-        limit = 10,
+        limit = 9,
         sortBy = "updatedAt",
         order = "desc",
     } = req.query;
@@ -124,6 +124,19 @@ export const createComment = async (req, res) => {
                 postId,
                 userId,
             },
+            select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                updatedAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    }
+                }
+            }
         });
 
         return res.status(201).json(createResponse(
@@ -184,6 +197,18 @@ export const updateCommentById = async (req, res) => {
         const comment = await prisma.comment.update({
             where: { id: commentId },
             data: { content },
+            select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+            }
         });
 
         return res.status(200).json(createResponse(

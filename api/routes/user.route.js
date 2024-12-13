@@ -1,7 +1,7 @@
 import express from "express";
 
 import { isAdmin } from "../middleware/verifyToken.js";
-import { validatePassword } from "../middleware/validatePassword.js";
+import { validatePassword, validateResetPassword } from "../middleware/validatePassword.js";
 
 import {
     getUserDetails,
@@ -34,7 +34,7 @@ router.put("/admin/:userId/suspend", isAdmin, suspendUser);
 // User specific Routes
 router.get("/me", getUserDetails); // Get details of the logged-in user
 router.put("/me", updateUserDetails); // Update logged-in user's details
-router.put("/me/password", validatePassword, changePassword); // Change password for logged-in user
+router.put("/me/password", validateResetPassword, changePassword); // Change password for logged-in user
 router.delete("/me", deleteSelf); // Delete logged-in user
 
 export default router;

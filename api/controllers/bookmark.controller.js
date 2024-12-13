@@ -93,7 +93,7 @@ export const getUserBookmarks = async (req, res) => {
     const userId = req.userId;
     let {
         page = 1,
-        limit = 10,
+        limit = 9,
         sortBy = "createdAt",
         order = "desc"
     } = req.query;

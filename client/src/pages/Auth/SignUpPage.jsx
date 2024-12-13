@@ -1,9 +1,10 @@
-import { motion } from "framer-motion";
-import Input from "../../components/Public/Auth/Input";
-import { Loader, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import PasswordStrengthMeter from "../../components/Public/Auth/PasswordStrengthMeter";
+import { Loader, Lock, Mail, User } from "lucide-react";
+
+import PasswordStrengthMeter from "../../components/auth/PasswordStrengthMeter";
+import Input from "../../components/ui/Input";
 import { useAuthStore } from "../../store/authStore";
 import { toastWithTime } from "../../components/ui/Toaster";
 

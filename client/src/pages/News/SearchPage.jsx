@@ -1,9 +1,9 @@
-import Breadcrumb from "../../components/Public/Breadcrumb";
-import Category from "../../components/Public/Category";
-import Search from "../../components/Public/Search";
-import PopularNews from "../../components/Public/News/PopularNews";
-import RecentNews from "../../components/Public/News/RecentNews";
-import SearchNews from "../../components/Public/News/SearchNews";
+import Breadcrumb from "../../components/ui/Breadcrumb";
+import Category from "../../components/category/Category";
+import Search from "../../components/search/Search";
+import PopularNews from "../../components/News/PopularNews";
+import RecentNews from "../../components/News/RecentNews";
+import SearchNews from "../../components/News/SearchNews";
 
 const SearchPage = () => {
     return (
@@ -28,7 +28,7 @@ const SearchPage = () => {
                                     <div className="flex flex-col gap-y-8">
                                         <Search />
                                         <RecentNews />
-                                        <div className="p-4 bg-white">
+                                        <div className="p-4 bg-white rounded-md">
                                             <Category titleStyle="text-gray-700 font-bold" />
                                         </div>
                                     </div>

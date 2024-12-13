@@ -92,7 +92,7 @@ export const getPostsByCategory = async (req, res) => {
     const { categoryName } = req.params;
     const {
         page = 1,
-        limit = 10,
+        limit = 9,
         orderBy = "createdAt",
         order = "desc"
     } = req.query;
@@ -137,7 +137,7 @@ export const getPostsByCategory = async (req, res) => {
 export const getCategoryListForAdmin = async (req, res) => {
     let {
         page = 1,
-        limit = 10,
+        limit = 9,
         sortBy = "name",
         order = "asc"
     } = req.query;

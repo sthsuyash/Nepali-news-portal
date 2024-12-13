@@ -66,7 +66,7 @@ export const searchNews = async (req, res) => {
     let {
         q,
         page = 1,
-        limit = 10,
+        limit = 9,
         sortBy = "createdAt",
         order = "desc"
     } = req.query;
@@ -276,7 +276,7 @@ export const getPopularNews = async (req, res) => {
 export const getAllPosts = async (req, res) => {
     let {
         page = 1,
-        limit = 10,
+        limit = 9,
         sortBy = "createdAt",
         order = "desc"
     } = req.query;

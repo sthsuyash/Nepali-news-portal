@@ -108,7 +108,7 @@ export const updateUserDetails = async (req, res) => {
         res.status(200).json(createResponse(
             true,
             200,
-            `User ${user.id} updated successfully`,
+            `User updated successfully`,
             { ...returnUser }
         ));
     } catch (error) {
@@ -141,7 +141,6 @@ export const changePassword = async (req, res) => {
                 "User not found"
             ));
         }
-
         const isOldPasswordValid = await bcryptjs.compare(oldPassword, user.password);
         if (!isOldPasswordValid) {
             return res.status(400).json(createResponse(
@@ -220,7 +219,7 @@ export const deleteSelf = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     let {
         page = 1,
-        limit = 10,
+        limit = 9,
         sortBy = "createdAt",
         order = "desc",
     } = req.query;

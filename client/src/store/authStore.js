@@ -1,12 +1,6 @@
 import { create } from "zustand";
-import axios from "axios";
+import { api } from "../config";
 
-const API_URL = import.meta.env.VITE_NODE_ENV === "development" ? import.meta.env.VITE_API_URL : "/api/v2";
-
-const api = axios.create({
-	baseURL: API_URL,
-	withCredentials: true,
-});
 
 export const useAuthStore = create((set) => ({
 	user: null,
@@ -15,6 +9,28 @@ export const useAuthStore = create((set) => ({
 	isLoading: false,
 	isCheckingAuth: false,
 	message: null,
+
+	checkAuth: async () => {
+		set({ isCheckingAuth: true });
+		try {
+			const response = await api.get("/users/me");
+
+			if (response?.data.success) {
+				set({
+					user: response?.data.data,
+					isAuthenticated: true,
+					isCheckingAuth: false
+				});
+			}
+		} catch (error) {
+			set({
+				user: null,
+				isAuthenticated: false,
+				isCheckingAuth: false
+			});
+		}
+	},
+				
 
 	signup: async (email, password, name) => {
 		set({ isLoading: true, error: null });
@@ -43,7 +59,7 @@ export const useAuthStore = create((set) => ({
 		set({ isLoading: true, error: null });
 		try {
 			const response = await api.post("/auth/login", { email, password });
-			
+
 			if (response?.data.success) {
 				set({
 					user: response.data.data,
@@ -125,26 +141,6 @@ export const useAuthStore = create((set) => ({
 				isLoading: false,
 			});
 			throw error?.response?.data;
-		}
-	},
-
-	checkAuth: async () => {
-		try {
-			const response = await api.get("/users/me");
-
-			if (response?.data.success) {
-				set({
-					user: response?.data.data,
-					isAuthenticated: true,
-					isCheckingAuth: false
-				});
-			}
-		} catch (error) {
-			set({
-				user: null,
-				isAuthenticated: false,
-				isCheckingAuth: false
-			});
 		}
 	},
 

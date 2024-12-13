@@ -24,9 +24,11 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-fast-marquee": "^1.6.5",
+    "react-loading-skeleton": "^3.5.0",
     "react-multi-carousel": "^2.8.5",
     "react-router-dom": "^6.26.0",
     "react-spinners-components": "^2.0.4",
+    "react-tooltip": "^5.28.0",
     "sonner": "^1.7.1",
     "zustand": "^4.5.4"
   },

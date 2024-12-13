@@ -2,12 +2,11 @@ import { Toaster } from "sonner";
 import { useAuthStore } from "./store/authStore";
 import { useEffect } from "react";
 
-import {Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import {
-	ProtectedRoute,
-	AdminProtectedRoute,
-	RedirectAuthenticatedUser
-} from "./components/Public/Auth/AuthRoutes";
+  ProtectedRoute,
+  RedirectAuthenticatedUser
+} from "./components/auth/AuthRoutes";
 
 // Public Pages
 import HomePage from "./pages/HomePage";
@@ -16,40 +15,43 @@ import IndividualCategoryPage from "./pages/News/IndividualCategoryPage";
 import SearchPage from "./pages/News/SearchPage";
 
 // Auth Pages
-import SignUpPage from "./pages/Auth/SignUpPage";
-import LoginPage from "./pages/Auth/LoginPage";
-import EmailVerificationPage from "./pages/Auth/EmailVerificationPage";
-import ForgotPasswordPage from "./pages/Auth/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/Auth/ResetPasswordPage";
-import ResendVerificationEmailPage from "./pages/Auth/ResendVerificationEmailPage";
+import SignUpPage from "./pages/auth/SignUpPage";
+import LoginPage from "./pages/auth/LoginPage";
+import EmailVerificationPage from "./pages/auth/EmailVerificationPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ResendVerificationEmailPage from "./pages/auth/ResendVerificationEmailPage";
 
 // Private User Pages
-import BookMarksPage from "./pages/User/BookmarksPage"; 
+import BookMarksPage from "./pages/user/BookmarksPage"; 
 
 // Private User Dashboard Pages
-import DashboardLayout from "./pages/User/DashboardLayout";
-import ProfilePage from "./pages/User/ProfilePage";
-import EditProfilePage from "./pages/User/EditProfilePage";
-import ChangePasswordPage from "./pages/User/ChangePasswordPage";
+import DashboardLayout from "./pages/user/dashboard/DashboardLayout";
+import ProfilePage from "./pages/user/dashboard/ProfilePage";
+import EditProfilePage from "./pages/user/dashboard/EditProfilePage";
+import ChangePasswordPage from "./pages/user/dashboard/ChangePasswordPage";
 
-// Admin Pages
-import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
-
-// Error and Other Pages
+// Error Page
 import ErrorPage from "./pages/ErrorPage";
-import LoadingSpinner from "./components/Public/Auth/LoadingSpinner";
-import Header from "./components/Public/Header/Header";
-import Footer from "./components/Public/Footer/Footer";
-import SecondaryHeader from "./components/Public/Header/HeaderCategory/SecondaryHeader";
+
+// Components
+import LoadingSpinner from "./components/ui/LoadingSpinner";
+import Header from "./components/header/Header";
+import Footer from "./components/footer/Footer";
+import SecondaryHeader from "./components/header/headercategory/SecondaryHeader";
 
 function App() {
   const { isCheckingAuth, checkAuth } = useAuthStore();
 
+  // Ensure checkAuth is called once on mount
   useEffect(() => {
-    checkAuth();
+    if (!isCheckingAuth) checkAuth();
   }, [checkAuth]);
 
-  if (isCheckingAuth) return <LoadingSpinner />;
+  if (isCheckingAuth) {
+    // Show a loading spinner or placeholder before authentication status is known
+    return <LoadingSpinner />;
+  }
 
   return (
     <div>
@@ -108,16 +110,6 @@ function App() {
           <Route path="edit" element={<EditProfilePage />} />
           <Route path="change-password" element={<ChangePasswordPage />} />
         </Route>
-
-        {/* Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <AdminProtectedRoute>
-              <AdminDashboardPage />
-            </AdminProtectedRoute>
-          }
-        />
 
         {/* Error Routes */}
         <Route path="/error" element={<ErrorPage />} />

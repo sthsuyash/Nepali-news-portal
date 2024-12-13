@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 
-import Breadcrumb from '../../components/Public/Breadcrumb';
-import Category from '../../components/Public/Category';
-import Search from '../../components/Public/Search';
-import PopularNews from '../../components/Public/News/PopularNews';
-import RecentNews from '../../components/Public/News/RecentNews';
-import SimpleDetailsNewCard from '../../components/Public/News/Items/SimpleDetailsNewCard';
-import { BASE_API_URL } from '../../config';
+import Breadcrumb from "../../components/ui/Breadcrumb";
+import Category from '../../components/category/Category';
+import Search from '../../components/search/Search';
+import PopularNews from '../../components/News/PopularNews';
+import RecentNews from '../../components/News/RecentNews';
+import SimpleDetailsNewCard from '../../components/News/Items/SimpleDetailsNewCard';
+
+import { api } from '../../config';
 
 const BookMarksPage = () => {
   const [news, setNews] = useState([]); // State to store fetched news
@@ -16,13 +17,7 @@ const BookMarksPage = () => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-          const res = await fetch(`${BASE_API_URL}/bookmarks`, {
-              method: 'GET',
-              credentials: 'include',
-                  headers: {
-                      'Content-Type': 'application/json',
-              }
-            });
+        const res = await api.get('/bookmarks');
           const data = await res.json();
 
         setNews(data.data.bookmarks);

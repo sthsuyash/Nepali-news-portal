@@ -1,8 +1,8 @@
-import { useState ,useEffect} from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
-import Input from "../../components/Public/Auth/Input";
+import Input from "../../components/ui/Input";
 import { useAuthStore } from "../../store/authStore";
 import { toastWithTime } from "../../components/ui/Toaster";
 import { useNavigate } from "react-router-dom";
