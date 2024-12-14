@@ -8,7 +8,8 @@ import { toastWithTime } from "../ui/Toaster.jsx";
 import { useAuthStore } from "../../store/authStore.js";
 
 const CommentSection = ({ newsId }) => {
-  const { comments, loading, addComment, deleteComment, editComment } = useComments(newsId);
+  const { comments, loading, addComment, deleteComment, editComment } =
+    useComments(newsId);
   const { isAuthenticated } = useAuthStore();
   const [newComment, setNewComment] = useState("");
 
@@ -35,13 +36,16 @@ const CommentSection = ({ newsId }) => {
           ></textarea>
           <button
             type="submit"
-            className={`mt-2 bg-red-600 text-white rounded px-4 py-2 ${loading ? "opacity-50" : ""}`}
+            className={`mt-2 bg-red-600 text-white rounded px-4 py-2 ${
+              loading ? "opacity-50" : ""
+            }`}
             disabled={loading}
           >
             {loading ? <Loader className="w-6 h-6 animate-spin" /> : "Comment"}
           </button>
         </form>
       )}
+      {!isAuthenticated && <p className="text-gray-500">Log in to comment.</p>}
       <div className="mt-4">
         {comments.length > 0 ? (
           comments.map((comment) => (
