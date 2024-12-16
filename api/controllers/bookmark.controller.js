@@ -145,6 +145,11 @@ export const getUserBookmarks = async (req, res) => {
             BOOKMARKS_URL
         )
 
+        const resData = {
+            id: bookmarks.id,
+            post: bookmarks.post,
+        }
+
 
         res.status(200).json(createResponse(
             true,

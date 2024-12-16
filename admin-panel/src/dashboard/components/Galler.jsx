@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { AiOutlineClose } from "react-icons/ai";
 import { MdCloudUpload } from "react-icons/md";
 import copy from 'copy-text-to-clipboard'
-import { toast  from 'sonner';
+import { toast } from 'sonner';
 
 const Galler = ({ setShow, images }) => {
 
