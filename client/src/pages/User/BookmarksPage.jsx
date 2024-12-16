@@ -8,6 +8,7 @@ import RecentNews from '../../components/News/RecentNews';
 import SimpleDetailsNewCard from '../../components/News/Items/SimpleDetailsNewCard';
 
 import { api } from '../../config';
+import CategoryPageSkeletion from '../../components/skeletons/CategoryPageSkeleton';
 
 const BookMarksPage = () => {
   const [news, setNews] = useState([]); // State to store fetched news
@@ -18,7 +19,7 @@ const BookMarksPage = () => {
     const fetchNews = async () => {
       try {
         const res = await api.get('/bookmarks');
-          const data = await res.json();
+        const data = res.data;
 
         setNews(data.data.bookmarks);
       } catch (error) {
@@ -32,7 +33,7 @@ const BookMarksPage = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <CategoryPageSkeletion />;
   }
 
   return (
@@ -51,7 +52,7 @@ const BookMarksPage = () => {
                   {news && news.length > 0 && news.map((item, i) => (
                     <SimpleDetailsNewCard
                       key={`news-${i}`} // Add unique key
-                      news={item}
+                      news={item.post}
                       type="details-news"
                       height={200}
                       sliceLength={100}

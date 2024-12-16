@@ -22,7 +22,6 @@ const useWeather = (latitude, longitude) => {
     const fetchAirQualityData = async () => {
       try {
         const airQualityData = await weatherApi.fetchAirQualityData(latitude, longitude);
-        console.log(airQualityData);
         setAirQuality(airQualityData);
       } catch (error) {
         console.error('Error fetching air quality data:', error);

@@ -15,7 +15,6 @@ const ProfilePage = () => {
     const fetchUserData = async () => {
       try {
         const response = await api.get('/users/me');
-        console.log(response);
         if (response.data.success) {
           setUser(response.data.data);
         } else {

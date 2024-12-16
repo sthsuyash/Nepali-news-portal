@@ -1,13 +1,8 @@
 import { Link, Outlet } from "react-router-dom";
-import { motion } from "framer-motion";
 
 const DashboardLayout = () => {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.5 }}
+    <div
       className="min-h-screen bg-gray-50 flex"
     >
       {/* Sidebar */}
@@ -29,7 +24,7 @@ const DashboardLayout = () => {
       <div className="flex-1 p-8 bg-gray-100">
         <Outlet />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
