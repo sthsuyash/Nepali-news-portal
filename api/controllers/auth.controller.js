@@ -15,6 +15,93 @@ import { config } from "../config/index.js";
 const CLIENT_URL = config.server.clientURL;
 const JWT_SECRET = config.jwt.secret;
 
+/** Admin dashboard routes */
+
+/**
+ * Logs an admin into the system by validating their email and password.
+ * @param {Object} req - The Express request object containing the admin's login credentials (email and password).
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
+export const adminLogin = async (req, res) => {
+	const { email, password } = req.body;
+
+	// check if both email and password are provided
+	if (!email || !password) {
+		return res.status(400).json(createResponse(
+			false,
+			400,
+			"All fields are required"
+		));
+	}
+
+	try {
+		const user = await prisma.user.findUnique({
+			where: { email },
+			include: { role: true }
+		});
+
+		if (!user) {
+			return res.status(400).json(createResponse(
+				false,
+				400,
+				"Invalid credentials"
+			));
+		}
+
+		if (user.role.name !== "ADMIN") {
+			return res.status(403).json(createResponse(
+				false,
+				403,
+				"Unauthorized"
+			));
+		}
+
+		const isPasswordValid = await bcryptjs.compare(password, user.password);
+
+		if (!isPasswordValid) {
+			return res.status(400).json(createResponse(
+				false,
+				400,
+				"Invalid credentials"
+			));
+		}
+
+		generateTokenAndSetCookie(res, user.id, user.role.name);
+
+		user.lastLogin = new Date();
+		await prisma.user.update({
+			where: { id: user.id },
+			data: { lastLogin: user.lastLogin },
+		});
+
+		const returnUser = {
+			id: user.id,
+			email: user.email,
+			name: user.name,
+			phone: user.phone,
+			lastLogin: user.lastLogin,
+			isVerified: user.isVerified,
+			role: { name: user.role.name },
+			createdAt: user.createdAt,
+			updatedAt: user.updatedAt
+		}
+
+		res.status(200).json(createResponse(
+			true,
+			200,
+			"Logged in successfully",
+			{ ...returnUser }
+		));
+	} catch (error) {
+		res.status(400).json(createResponse(
+			false,
+			400,
+			error.message
+		));
+	}
+};
+
 /**
  * Registers a new user in the system, hashes their password, and sends a verification email.
  * @param {Object} req - The Express request object containing the user's registration data.

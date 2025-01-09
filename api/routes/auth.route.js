@@ -9,6 +9,8 @@ import {
 
 	forgotPassword,
 	resetPassword,
+
+	adminLogin,
 } from "../controllers/auth.controller.js";
 
 import {
@@ -18,6 +20,10 @@ import {
 
 const router = express.Router();
 
+// admin dashboard routes
+router.post("/admin/login", adminLogin);
+
+// user client routes
 router.post("/signup", validatePassword, signup);
 router.post("/login", login);
 router.post("/logout", logout);
@@ -26,6 +32,6 @@ router.post("/verify-email", verifyEmail);
 router.post("/resend-verification-email/", resendVerificationEmail);
 
 router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", validatePassword, resetPassword);
+router.post("/reset-password/:token", validateResetPassword, resetPassword);
 
 export default router;

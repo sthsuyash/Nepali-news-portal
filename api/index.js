@@ -20,18 +20,30 @@ let CLIENT_URL;
 const app = express();
 const __dirname = path.resolve();
 
-// Environment-specific CORS configuration
-if (NODE_ENV === "development") {
-	CLIENT_URL = "http://localhost:5173"
-} else {
-	CLIENT_URL = config.server.clientURL;
-}
+const allowedOrigins = [
+	"http://localhost:5001",
+	"http://localhost:5002",
+	"http://localhost:3001",
+	"http://localhost:3002",
+];
+
+const corsOptions = {
+	origin: function (origin, callback) {
+		// Allow requests with no origin (like mobile apps or Postman)
+		if (!origin) return callback(null, true);
+
+		// Check if the origin is in the allowedOrigins array
+		if (allowedOrigins.indexOf(origin) !== -1) {
+			callback(null, true); // Origin allowed
+		} else {
+			callback(new Error("Not allowed by CORS")); // Origin not allowed
+		}
+	},
+	credentials: true // Allow cookies and other credentials
+};
 
 // Enable CORS with dynamic configuration based on environment
-app.use(cors({
-	origin: CLIENT_URL, // Allow client URL origin in production
-	credentials: true, // Allow credentials like cookies
-}));
+app.use(cors(corsOptions));
 
 // Security middleware (Helmet helps secure HTTP headers)
 app.use(helmet());
