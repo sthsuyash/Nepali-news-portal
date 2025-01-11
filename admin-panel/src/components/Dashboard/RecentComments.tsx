@@ -10,9 +10,16 @@ interface Comment {
 }
 
 const modifyDate = (date: string) => {
-  const options = { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric" };
-  return new Date(date).toLocaleDateString("en-US", options);
-}
+  const options: Intl.DateTimeFormatOptions = { 
+    year: "numeric", 
+    month: "short", 
+    day: "numeric", 
+    hour: "numeric", 
+    minute: "numeric" 
+  };
+  return new Date(date).toLocaleString("en-US", options);
+};
+
 
 export const RecentComments = () => {
   const page = 1;
