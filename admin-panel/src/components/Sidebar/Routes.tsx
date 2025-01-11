@@ -1,4 +1,4 @@
-import { Paperclip, Users, Home } from "lucide-react";
+import { Paperclip, Users, Home, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom"; // Import useLocation hook
 
 const Routes = () => {
@@ -23,6 +23,12 @@ const Routes = () => {
         selected={location.pathname === "/posts"} // Check if the current path is '/posts'
         title="Posts"
         to="/posts"
+      />
+      <Route
+        Icon={LogOut}
+        selected={location.pathname === "/logout"}
+        title="Logout"
+        to="/logout"
       />
     </div>
   );
