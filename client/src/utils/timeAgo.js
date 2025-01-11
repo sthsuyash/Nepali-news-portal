@@ -9,6 +9,8 @@ export const timeAgo = (date) => {
   const days = Math.floor(hours / 24);
   if (days == 1) return `${days} day ago`;
   if (days > 1 && days < 30) return `${days} days ago`;
+  const month = Math.floor(days / 30);
+  if (month == 1) return `${month} month ago`;
   const months = Math.floor(days / 30);
   if (months < 12) return `${months} months ago`;
   const years = Math.floor(months / 12);
