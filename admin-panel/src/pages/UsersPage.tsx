@@ -3,6 +3,7 @@ import { FaEye } from "react-icons/fa";
 import { MainLayout } from "@/layout/MainLayout";
 import { useAuthStore } from "@/store/authStore";
 import { useUsers } from "@/hooks/useUsers";
+import { useState } from "react";
 
 const UsersPage: React.FC = () => {
     const { user } = useAuthStore(); // Access the token
@@ -10,6 +11,13 @@ const UsersPage: React.FC = () => {
     const limit = 10;
 
     const { users, error } = useUsers(page, limit);
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const filteredUsers = users.filter((users) => {
+        const matchesSearch = users.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+        return matchesSearch;
+    });
     return (
         <MainLayout>
             <div className="bg-white rounded-md">
@@ -22,7 +30,15 @@ const UsersPage: React.FC = () => {
                         Add User
                     </Link>
                 </div>
-
+                <div className="flex items-center gap-4 p-4">
+                    <input
+                        type="text"
+                        placeholder="Search User..."
+                        className="w-1/2 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
                 <div className="relative overflow-x-auto p-4">
                     {error && <div className="text-red-500">{error}</div>}
 
