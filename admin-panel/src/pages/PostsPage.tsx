@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { MainLayout } from "@/layout/MainLayout";
 import { useAuthStore } from "@/store/authStore";
-import { usePosts} from "@/hooks/usePosts";
+import { usePosts } from "@/hooks/usePosts";
+import { useCategories } from "@/hooks/useCategories";
 import { useState } from "react";
 
 const PostsPage: React.FC = () => {
@@ -10,27 +11,20 @@ const PostsPage: React.FC = () => {
     const page = 1;
     const limit = 10;
 
-    const { posts, error } = usePosts(page, limit);
+    const { posts, error: postsError } = usePosts(page, limit);
+    const { categories, error: categoriesError, isLoading } = useCategories(); // Fetch categories from API
 
-     // Search and Category Filter states
-     const [searchQuery, setSearchQuery] = useState("");
-     const [selectedCategory, setSelectedCategory] = useState("");
- 
-     // dummy data for categpries
-     const categories = [
-         { id: "", name: "All Categories" },
-         { id: "1", name: "Technology" },
-         { id: "2", name: "Health" },
-         { id: "3", name: "Education" },
-         { id: "4", name: "Business" },
-     ];
- 
-     // Filtered posts based on search query and selected category
-     const filteredPosts = posts.filter((post) => {
-         const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
-         const matchesCategory = selectedCategory === "" || post.category.id === selectedCategory;
-         return matchesSearch && matchesCategory;
-     });
+    // Search and Category Filter states
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+
+    // Filtered posts based on search query and selected category
+    const filteredPosts = posts.filter((post) => {
+        const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === "" || post.category.name === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
     return (
         <MainLayout>
             <div className="bg-white rounded-md">
@@ -44,8 +38,8 @@ const PostsPage: React.FC = () => {
                     </Link>
                 </div>
 
-                 {/* Search and Category Filter */}
-                 <div className="flex items-center gap-4 p-4">
+                {/* Search and Category Filter */}
+                <div className="flex items-center gap-4 p-4">
                     <input
                         type="text"
                         placeholder="Search posts..."
@@ -57,18 +51,22 @@ const PostsPage: React.FC = () => {
                         className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
+                        disabled={isLoading || categoriesError} 
                     >
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
+                        <option value="">All Categories</option>
+                        {categories &&
+                            categories.map((category) => (
+                                <option key={category.id} value={category.name}>
+                                    {category.name}
+                                </option>
+                            ))}
                     </select>
                 </div>
 
+                {categoriesError && <div className="text-red-500 p-4">Failed to load categories.</div>}
 
                 <div className="relative overflow-x-auto p-4">
-                    {error && <div className="text-red-500">{error}</div>}
+                    {postsError && <div className="text-red-500">{postsError}</div>}
 
                     <table className="w-full text-sm text-left text-slate-600">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -79,19 +77,17 @@ const PostsPage: React.FC = () => {
                                 <th className="px-7 py-3">Category</th>
                                 <th className="px-7 py-3">Nepali Name</th>
                                 <th className="px-7 py-3">Date</th>
-                    
                                 <th className="px-7 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {posts.map((post, index) => (
+                            {filteredPosts.map((post, index) => (
                                 <tr key={post.id} className="bg-white border-b">
                                     <td className="px-6 py-4">{index + 1}</td>
                                     <td className="px-6 py-4">{post.title}</td>
                                     <td className="px-6 py-4">{post.status}</td>
                                     <td className="px-6 py-4">{post.category.name}</td>
                                     <td className="px-6 py-4">{post.category.nepaliName}</td>
-        
                                     <td className="px-6 py-4">
                                         {new Date(post.createdAt).toLocaleString("en-US", {
                                             year: "numeric",
@@ -121,6 +117,13 @@ const PostsPage: React.FC = () => {
                             ))}
                         </tbody>
                     </table>
+
+                    {/* Empty state for no results */}
+                    {filteredPosts.length === 0 && (
+                        <div className="text-center text-gray-500 mt-4">
+                            No posts found for the given search or category.
+                        </div>
+                    )}
                 </div>
             </div>
         </MainLayout>
