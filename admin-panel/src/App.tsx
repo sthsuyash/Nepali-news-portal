@@ -13,6 +13,8 @@ import LoginPage from "@/pages/LoginPage";
 import HomePage from "@/pages/HomePage";
 import UsersPage from "@/pages/UsersPage";
 import PostsPage from "@/pages/PostsPage";
+import LogoutPage from "@/pages/LogoutPage";
+import CategoriesPage from "@/pages/CategoriesPage";
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated } = useAuthStore();
@@ -60,6 +62,15 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/categories"
+          element={
+            <PrivateRoute>
+              <CategoriesPage/>
+            </PrivateRoute>
+          }
+        />
+         <Route path="/logout" element={<LogoutPage />} />
 
         
       </Routes>
