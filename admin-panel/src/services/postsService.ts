@@ -12,11 +12,19 @@ import { api } from "@/config/index";
             params: { page, limit }
         });
         console.log("Full response:", response.data.data);
-        return response.data.data; 
+        return {
+            posts: response.data.data.posts || [], // Array of posts
+            total: response.data.data.pagination?.total || 0, // Total number of posts
+        };
     } catch (error: any) {
         console.error("Error fetching posts:", error); // Log error details
         throw new Error("Failed to fetch posts: " + error.response?.data?.message || error.message);
     }
+};
+
+export const createPost = async (postData: any) => {
+    const response = await api.post("/posts/admin", postData);
+    return response.data.data;
 };
 
 export { fetchPosts };

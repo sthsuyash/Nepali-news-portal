@@ -15,6 +15,7 @@ import UsersPage from "@/pages/UsersPage";
 import PostsPage from "@/pages/PostsPage";
 import LogoutPage from "@/pages/LogoutPage";
 import CategoriesPage from "@/pages/CategoriesPage";
+import CreatePost from "@/pages/createPostPage";
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated } = useAuthStore();
@@ -66,18 +67,21 @@ function App() {
           path="/categories"
           element={
             <PrivateRoute>
-              <CategoriesPage/>
+              <CategoriesPage />
             </PrivateRoute>
           }
         />
-         <Route path="/logout" element={<LogoutPage />} />
-
-        
+        <Route
+          path="/create-post"
+          element={
+            <PrivateRoute>
+              <CreatePost />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/logout" element={<LogoutPage />} />
       </Routes>
-      <Toaster
-        richColors={true}
-        position="top-right"
-      />
+      <Toaster richColors={true} position="top-right" />
     </>
   );
 }
