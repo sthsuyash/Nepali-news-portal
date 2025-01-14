@@ -22,8 +22,13 @@ const CreatePost: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files && files.length > 0) {
-      setImage(files[0]);
-      setImgPreview(URL.createObjectURL(files[0]));
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        setImage(file);
+        setImgPreview(URL.createObjectURL(file));
+      } else {
+        toast.error("Please select a valid image file.");
+      }
     }
   };
 
