@@ -1,4 +1,4 @@
-import { Paperclip, Users, Home, LogOut, List } from "lucide-react";
+import { Paperclip, Users, Home, LogOut, List, CirclePlus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom"; // Import useLocation hook
 
 const Routes = () => {
@@ -18,9 +18,9 @@ const Routes = () => {
         title="Users"
         to="/users"
       />
-       <Route
+      <Route
         Icon={List}
-        selected={location.pathname === "/categories"} 
+        selected={location.pathname === "/categories"}
         title="Categories"
         to="/categories"
       />
@@ -30,7 +30,13 @@ const Routes = () => {
         title="Posts"
         to="/posts"
       />
-     
+      <Route
+        Icon={CirclePlus}
+        selected={location.pathname === "/create-post"}
+        title="Add Post"
+        to="/create-post"
+      />
+
       <Route
         Icon={LogOut}
         selected={location.pathname === "/logout"}
@@ -55,10 +61,11 @@ const Route = ({
   return (
     <Link to={to} className="w-full">
       <button
-        className={`flex items-center justify-start gap-3 w-full rounded px-2 py-1.5 text-sm transition-[box-shadow,_background-color,_color] ${selected
+        className={`flex items-center justify-start gap-3 w-full rounded px-2 py-1.5 text-sm transition-[box-shadow,_background-color,_color] ${
+          selected
             ? "bg-white text-stone-950 shadow"
             : "hover:bg-stone-200 bg-transparent text-stone-500 shadow-none"
-          }`}
+        }`}
       >
         <Icon className={selected ? "text-violet-500" : ""} />
         <span>{title}</span>

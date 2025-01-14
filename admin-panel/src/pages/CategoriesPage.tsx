@@ -31,7 +31,7 @@ export const CategoryPage: React.FC = () => {
                     <input
                         type="text"
                         placeholder="Search categories..."
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-1/2 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />

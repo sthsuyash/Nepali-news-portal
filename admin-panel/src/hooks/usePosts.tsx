@@ -10,6 +10,7 @@ import { fetchPosts } from "@/services/postsService";
  */
 export const usePosts = (page: number, limit: number) => {
     const [posts, setPosts] = useState([]);
+    const [totalPosts, setTotalPosts] = useState(0)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -18,8 +19,9 @@ export const usePosts = (page: number, limit: number) => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await fetchPosts(page, limit);
-                setPosts(data.posts);
+                const { posts, total } = await fetchPosts(page, limit);
+                setPosts(posts);
+                setTotalPosts(total);
             } catch (err: any) {
                 setError(err.message || "An error occurred while fetching users");
             } finally {
@@ -30,6 +32,6 @@ export const usePosts = (page: number, limit: number) => {
         fetchData();
     }, [page, limit]);
 
-    return { posts, loading, error };
+    return { posts, totalPosts, loading, error };
 };
 
