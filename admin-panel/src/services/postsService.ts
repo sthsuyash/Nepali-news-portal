@@ -22,9 +22,9 @@ import { api } from "@/config/index";
     }
 };
 
-export const createPost = async (postData: any) => {
+ const createPost = async (postData: any) => {
     const response = await api.post("/posts/admin", postData);
     return response.data.data;
 };
 
-export { fetchPosts };
+export { fetchPosts, createPost };
