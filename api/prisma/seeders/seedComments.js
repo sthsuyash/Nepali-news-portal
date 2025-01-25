@@ -1,4 +1,4 @@
-import prisma from "../../config/prisma.js";  // Adjust path based on your project structure
+import prisma from "../../config/prisma.js"; 
 
 // Function to generate random Nepali comments
 const generateNepaliComment = () => {

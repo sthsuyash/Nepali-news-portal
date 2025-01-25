@@ -13,17 +13,6 @@ import {
   getRecommendedNews,
 } from "../controllers/post.controller.js";
 import { isAdmin, verifyToken } from "../middleware/verifyToken.js";
-import multer from "multer";
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Specify the folder for uploaded files
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // Add timestamp to avoid file name conflicts
-  },
-});
-const upload = multer({ storage });
 
 // Configure rate limiter: maximum of 100 requests per 15 minutes
 const limiter = rateLimit({
@@ -35,7 +24,7 @@ const router = express.Router();
 
 // Admin routes
 router.get("/admin", verifyToken, isAdmin, getAllPosts);
-router.post("/admin", limiter, verifyToken, isAdmin, upload.single("image"), createPost);
+router.post("/admin", limiter, verifyToken, isAdmin, createPost);
 router.get("/admin/:postId", verifyToken, isAdmin, getPostById);
 router.put("/admin/:postId", verifyToken, isAdmin, updatePostById);
 router.delete("/admin/:postId", verifyToken, isAdmin, deletePostById);

@@ -1,5 +1,8 @@
 import prisma from "../../config/prisma.js";
 import { faker } from '@faker-js/faker';
+import { config } from "../../config/index.js";
+
+const UNSPLASH_ACCESS_KEY = config.unsplash.accessKey;
 
 // Function to generate random Nepali titles
 const generateNepaliTitle = () => {
@@ -42,13 +45,14 @@ const generateHTMLDescription = () => {
     return htmlContent;
 };
 
-const getRandomImage = async () => {
+// Function to get category-specific images from Unsplash
+const getCategoryImage = async (category) => {
     try {
-        const response = await fetch('https://picsum.photos/1920/1080');
-        const imageUrl = response.url;
-        return imageUrl;
+        const response = await fetch(`https://api.unsplash.com/photos/random?query=${category},Nepal&orientation=landscape&client_id=${UNSPLASH_ACCESS_KEY}`);
+        const data = await response.json();
+        return data?.urls?.regular || null;
     } catch (error) {
-        console.error("Error fetching image:", error);
+        console.error("Error fetching image from Unsplash:", error);
         return null;
     }
 };
@@ -84,19 +88,17 @@ const seedPosts = async () => {
                 continue;
             }
 
-            // Create 10 posts for each category
-            for (let i = 0; i < 10; i++) {
+            // Create 5 posts for each category
+            for (let i = 0; i < 5; i++) {
                 const title = generateNepaliTitle();
-                // create slug by exact date and time
                 const slug = `${faker.lorem.slug()}-${Date.now()}`;
                 const description = generateHTMLDescription();
-                const image = await getRandomImage();
-                const status = i % 2 === 0 ? "PUBLISHED" : "DRAFT";
+                const image = await getCategoryImage(categoryName);  // Get image based on category
 
-                // generate a random sentiment
+                // Generate a random sentiment
                 const sentiment = sentiments[Math.floor(Math.random() * sentiments.length)];
 
-                // get the sentiment id
+                // Get the sentiment id
                 const sentimentId = await prisma.sentiment.findFirst({
                     where: { name: sentiment }
                 });
@@ -110,7 +112,6 @@ const seedPosts = async () => {
                         slug,
                         description,
                         image,
-                        status,
                         category: {
                             connect: { id: category.id }
                         },
@@ -120,7 +121,6 @@ const seedPosts = async () => {
                         sentiment: {
                             connect: { id: sentimentId.id }
                         }
-
                     },
                 });
 
@@ -137,4 +137,3 @@ const seedPosts = async () => {
 };
 
 export default seedPosts;
-// seedPosts();

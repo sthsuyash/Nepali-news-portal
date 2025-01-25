@@ -24,6 +24,9 @@ const CreatePost: React.FC = () => {
     if (files && files.length > 0) {
       const file = files[0];
       if (file.type.startsWith("image/")) {
+        if (imgPreview) {
+          URL.revokeObjectURL(imgPreview); // Cleanup previous preview
+        }
         setImage(file);
         setImgPreview(URL.createObjectURL(file));
       } else {
@@ -31,6 +34,7 @@ const CreatePost: React.FC = () => {
       }
     }
   };
+
 
   const addPost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +51,14 @@ const CreatePost: React.FC = () => {
     try {
       const response = await handleCreatePost(formData);
       toast.success(response.message);
-    } catch (error) {
-      // Error handling is already managed in the hook, so no additional logic is needed here.
+
+      // Reset the form fields
+      setTitle("");
+      setDescription("");
+      setImage(null);
+
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -126,9 +136,10 @@ const CreatePost: React.FC = () => {
               <JoditEditor
                 ref={editor}
                 value={description}
-                onBlur={(value) => setDescription(value)}
-                onChange={() => {}}
+                onBlur={(newContent) => setDescription(newContent)} // Explicitly set the new content
+                onChange={() => { }}
               />
+
             </div>
 
             {/* Submit Button */}

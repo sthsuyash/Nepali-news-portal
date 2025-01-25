@@ -47,13 +47,13 @@ model Category {
 }
 
 model Post {
-  id          String     @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
-  slug        String     @unique
+  slug        String  @unique
   image       String?
   description String
-  status      PostStatus @default(PUBLISHED)
-  visitCount  Int        @default(0)
+  visitCount  Int     @default(0)
+  summary     String @default("")
 
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)

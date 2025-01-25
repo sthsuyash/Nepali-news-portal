@@ -89,7 +89,6 @@ const PostsPage: React.FC = () => {
               <tr>
                 <th className="px-7 py-3">No</th>
                 <th className="px-7 py-3">Title</th>
-                <th className="px-7 py-3">Status</th>
                 <th className="px-7 py-3">Category</th>
                 <th className="px-7 py-3">Nepali Name</th>
                 <th className="px-7 py-3">Date</th>
@@ -101,7 +100,6 @@ const PostsPage: React.FC = () => {
                 <tr key={post.id} className="bg-white border-b">
                   <td className="px-6 py-4">{index + 1}</td>
                   <td className="px-6 py-4">{post.title}</td>
-                  <td className="px-6 py-4">{post.status}</td>
                   <td className="px-6 py-4">{post.category.name}</td>
                   <td className="px-6 py-4">{post.category.nepaliName}</td>
                   <td className="px-6 py-4">

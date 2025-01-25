@@ -2,12 +2,18 @@ import prisma from "../config/prisma.js";
 import { createResponse } from "../utils/responseModel.js";
 import { paginate } from "../utils/pagination.js";
 import { config } from "../config/index.js";
+import { uploadSingle } from "../config/multer.js";
 import cloudinary from "cloudinary";
 
 const POSTS_URL = config.server.apiURL + "/posts";
 const ADMIN_URL = POSTS_URL + "/admin";
 
 const NEWS_ALGORITHM_API_URL = config.newsAlgorithm.apiURL;
+
+const CLOUD_NAME = config.cloudinary.cloudName;
+const CLOUDINARY_API_KEY = config.cloudinary.apiKey;
+const CLOUDINARY_API_SECRET = config.cloudinary.apiSecret;
+const CLOUDINARY_API_URL = config.cloudinary.url;
 
 /** Public routes */
 
@@ -24,9 +30,8 @@ export const getRecentPosts = async (req, res) => {
   limit = parseInt(limit);
 
   try {
-    const total = await prisma.post.count({ where: { status: "PUBLISHED" } });
+    const total = await prisma.post.count({});
     const posts = await prisma.post.findMany({
-      where: { status: "PUBLISHED" },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: {
@@ -100,7 +105,6 @@ export const searchNews = async (req, res) => {
     // Count total number of posts matching the search query
     const total = await prisma.post.count({
       where: {
-        status: "PUBLISHED",
         OR: [
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
@@ -111,7 +115,6 @@ export const searchNews = async (req, res) => {
     // Fetch posts matching the search query with pagination and sorting
     const posts = await prisma.post.findMany({
       where: {
-        status: "PUBLISHED",
         OR: [
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
@@ -182,7 +185,6 @@ export const getRecommendedNews = async (req, res) => {
       where: {
         id: { not: postId },
         categoryId: post.categoryId,
-        status: "PUBLISHED",
       },
       take: 4,
       orderBy: { createdAt: "desc" },
@@ -257,13 +259,9 @@ export const getPopularNews = async (req, res) => {
 
   try {
     const total = await prisma.post.count({
-      where: {
-        status: "PUBLISHED",
-      },
     });
 
     const posts = await prisma.post.findMany({
-      where: { status: "PUBLISHED" },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: {
@@ -326,7 +324,6 @@ export const getAllPosts = async (req, res) => {
         title: true,
         createdAt: true,
         updatedAt: true,
-        status: true,
         category: {
           select: {
             name: true,
@@ -358,6 +355,7 @@ export const getAllPosts = async (req, res) => {
       .json(createResponse(false, 500, "Internal server error"));
   }
 };
+
 
 /**
  * Fetches a post by its ID.
@@ -400,105 +398,127 @@ export const getPostById = async (req, res) => {
 };
 
 cloudinary.v2.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
+  cloud_name: CLOUD_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
   secure: true,
 });
 
+/**
+ * Creates a new post with image upload.
+ * @param {Object} req - The Express request object containing the post data in body and image in file.
+ * @param {Object} res - The Express response object to send back the response.
+ * @returns {void}
+ */
 export const createPost = async (req, res) => {
-  const { title, description, status } = req.body;
-
-  try {
-    // Call the algorithm endpoint to get the category label
-    // const categoryResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/classify`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ text: description }),
-    // });
-
-    // const sentimentResponse = await fetch(
-    //   `${NEWS_ALGORITHM_API_URL}/sentiment`,
-    //   {
-    //     method: "POST", // Should be POST if body is included
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ text: description }),
-    //   }
-    // );
-
-    // const summaryResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/summary`, {
-    //   method: "POST", // Should be POST if body is included
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ text: description }),
-    // });
-
-    // if (!categoryResponse.ok) {
-    //   throw new Error("Failed to classify category");
-    // }
-    // if (!sentimentResponse.ok) {
-    //   throw new Error("Failed to analyze sentiment");
-    // }
-    // if (!summaryResponse.ok) {
-    //   throw new Error("Failed to generate summary");
-    // }
-
-    // const categoryData = await categoryResponse.json();
-    // const sentimentData = await sentimentResponse.json();
-    // const summaryData = await summaryResponse.json();
-
-    // Cloudinary Image Upload
-    const result = await cloudinary.v2.uploader.upload(req.file.path, {
-      folder: "news_images",
-    });
-    const imageUrl = result.secure_url;
-    if (!req.file) {
+  // Use the uploadSingle middleware to handle image upload
+  uploadSingle(req, res, async (err) => {
+    if (err) {
       return res
         .status(400)
-        .json(createResponse(false, 400, "Image is required"));
+        .json({ success: false, message: err.message || "File upload error" });
     }
 
-    // const categoryId = categoryData.category;
-    // const sentimentId = sentimentData.sentiment;
+    const { title, description } = req.body;
 
-    // Create the post in the database
-    const post = await prisma.post.create({
-      data: {
-        title,
-        description,
-        image: imageUrl,
-        status,
-        category: "Health",
-        // category: {
-        //   connect: { id: categoryId },
-        // },
-        // sentiment: {
-        //   connect: { id: sentimentId },
-        // },
-        // summary: summaryData.summary,
-      },
-    });
+    if (!req.file) {
+      return res.status(400).json(createResponse(false, 400, "Image is required"));
+    }
 
-    return res
-      .status(201)
-      .json(createResponse(true, 201, "Post created successfully", post));
-  } catch (error) {
-    console.error(error.message);
-    return res
-      .status(500)
-      .json(createResponse(false, 500, "Internal server error"));
-  }
+    try {
+      // Upload image to Cloudinary
+      const result = await cloudinary.v2.uploader.upload_stream(
+        {
+          folder: "news_images", // Set a folder in Cloudinary to store images
+          resource_type: "image", // Ensures only images are uploaded
+        },
+        async (error, result) => {
+          if (error) {
+            return res.status(500).json(createResponse(false, 500, "Cloudinary upload failed"));
+          }
+
+          // Cloudinary returns a result with secure_url (URL of the uploaded image)
+          const imageUrl = result.secure_url;
+
+          // call the algorithm endpoint to get the category label
+          const categoryResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/classify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: description })
+          });
+
+          // call the algorithm endpoint to get the sentiment
+          const sentimentResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/analyze-sentiment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: description })
+          });
+
+          // call the summary endpoint to get the summary
+          const summaryResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/summarize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: description })
+          });
+
+          // Category data
+          const categoryData = await categoryResponse.json();
+          console.log(`Classified category: ${categoryData.data.category} and label: ${categoryData.data.label}`);
+
+          // Sentiment data
+          const sentimentData = await sentimentResponse.json();
+          console.log(`Sentiment: ${sentimentData.data.sentiment} and probability: ${sentimentData.data.probability}`);
+
+          // connect sentiment with the database id
+          const sentiment = await prisma.sentiment.findUnique({
+            where: { name: sentimentData.data.sentiment.toUpperCase() },
+          });
+
+          const summaryData = await summaryResponse.json();
+          // console.log(`Summary: ${summaryData.data.summary}`);
+
+          // Create post in the database
+          const post = await prisma.post.create({
+            data: {
+              title,
+              description,
+              image: imageUrl, // Store the Cloudinary image URL
+              category: {
+                connect: { id: categoryData.data.label },
+              },
+              sentiment: {
+                connect: { id: sentiment.id },
+              },
+              summary: summaryData.data.summary,
+              slug: title.toLowerCase().replace(/ /g, "-"),
+              user: {
+                connect: { id: req.userId },
+              }
+            },
+          });
+
+          return res.status(201).json(createResponse(
+            true,
+            201,
+            "Post created successfully",
+            post
+          ));
+        }
+      );
+
+      result.end(req.file.buffer); // Pass the image buffer to the upload stream
+    } catch (error) {
+      console.error("Error creating post:", error);
+      return res.status(500).json(createResponse(false, 500, "Internal server error"));
+    }
+  });
 };
-
-// // TODO: Implement the createPost function
-// export const createPost = async (req, res) => {
-//     console.log("createPost");
-// }
 
 /**
  * Updates a post by its ID.

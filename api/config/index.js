@@ -32,4 +32,14 @@ export const config = {
     newsAlgorithm: {
         apiURL: process.env.NEWS_ALGORITHM_API_URL,
     },
+    unsplash: {
+        accessKey: process.env.UNSPLASH_ACCESS_KEY,
+        secretKey: process.env.UNSPLASH_SECRET_KEY,
+    },
+    cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET,
+        url: process.env.CLOUDINARY_URL,
+    }
 };
