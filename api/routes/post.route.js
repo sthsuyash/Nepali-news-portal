@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import {
   getAllPosts,
   createPost,
@@ -23,11 +24,18 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
+// Configure rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
 const router = express.Router();
 
 // Admin routes
 router.get("/admin", verifyToken, isAdmin, getAllPosts);
-router.post("/admin", verifyToken, isAdmin, upload.single("image"), createPost);
+router.post("/admin", limiter, verifyToken, isAdmin, upload.single("image"), createPost);
 router.get("/admin/:postId", verifyToken, isAdmin, getPostById);
 router.put("/admin/:postId", verifyToken, isAdmin, updatePostById);
 router.delete("/admin/:postId", verifyToken, isAdmin, deletePostById);
