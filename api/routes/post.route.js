@@ -23,7 +23,7 @@ const limiter = rateLimit({
 const router = express.Router();
 
 // Admin routes
-router.get("/admin", verifyToken, isAdmin, getAllPosts);
+router.get("/admin", limiter, verifyToken, isAdmin, getAllPosts);
 router.post("/admin", limiter, verifyToken, isAdmin, createPost);
 router.get("/admin/:postId", verifyToken, isAdmin, getPostById);
 router.put("/admin/:postId", verifyToken, isAdmin, updatePostById);
