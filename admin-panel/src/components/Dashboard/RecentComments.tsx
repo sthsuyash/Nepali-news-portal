@@ -1,4 +1,4 @@
-import { useComments } from "@/hooks/useComments";
+import { useComments } from "@/hooks/comment/useComments";
 import { MessageSquareText, EllipsisVertical } from "lucide-react";
 
 interface Comment {

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { FaEye, FaTrash } from "react-icons/fa";
+import { FaEye, FaTrash, FaEdit } from "react-icons/fa";
 import { MainLayout } from "@/layout/MainLayout";
 import { useAuthStore } from "@/store/authStore";
-import { usePosts } from "@/hooks/usePosts";
-import { useCategories } from "@/hooks/useCategories";
+import { usePosts } from "@/hooks/post/usePosts";
+import { useCategories } from "@/hooks/category/useCategories";
 import { useState } from "react";
 
 const PostsPage: React.FC = () => {
@@ -45,7 +45,7 @@ const PostsPage: React.FC = () => {
         <div className="flex justify-between p-4">
           <h2 className="text-xl font-medium">Posts</h2>
           <Link
-            className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+            className="px-3 py-[6px] bg-primary rounded-sm text-white hover:bg-primary/80 transition-all duration-200"
             to="/create-post"
           >
             Create Post
@@ -114,13 +114,19 @@ const PostsPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex justify-start items-center gap-x-4 text-white">
                       <Link
-                        to={`/posts/admin/${post.id}`}
+                        to={`/posts/${post.id}`}
                         className="p-[6px] bg-green-500 rounded hover:shadow-lg hover:shadow-green-500/50"
                       >
                         <FaEye />
                       </Link>
                       <Link
-                        to={`/posts/admin/${post.id}`}
+                        to={`/posts/edit/${post.id}`}
+                        className="p-[6px] bg-blue-500 text-white rounded hover:shadow-lg hover:shadow-blue-500/50"
+                      >
+                        <FaEdit />
+                      </Link>
+                      <Link
+                        to={`/posts/delete/${post.id}`}
                         className="p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50"
                       >
                         <FaTrash />

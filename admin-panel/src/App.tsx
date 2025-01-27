@@ -8,14 +8,30 @@ import LoadingSpinner from "@/components/customUI/LoadingSpinner";
 
 import PrivateRoute from "@/routes/PrivateRoutes";
 import ErrorPage from "@/pages/ErrorPage";
-import LoginPage from "@/pages/LoginPage";
+import LoginPage from "@/pages/auth/LoginPage";
 
 import HomePage from "@/pages/HomePage";
-import UsersPage from "@/pages/UsersPage";
-import PostsPage from "@/pages/PostsPage";
-import LogoutPage from "@/pages/LogoutPage";
-import CategoriesPage from "@/pages/CategoriesPage";
-import CreatePost from "@/pages/createPostPage";
+
+// Auth pages
+import LogoutPage from "@/pages/auth/LogoutPage";
+
+// User pages
+import UsersPage from "@/pages/user/UsersPage";
+import CreateUserPage from "@/pages/user/CreateUserPage";
+import ViewUserPage from "@/pages/user/ViewUserPage";
+import EditUserPage from "@/pages/user/EditUserPage";
+
+// Post pages
+import PostsPage from "@/pages/post/PostsPage";
+import CreatePostPage from "@/pages/post/CreatePostPage";
+import ViewPostPage from "@/pages/post/ViewPostPage";
+import EditPostPage from "@/pages/post/EditPostPage";
+
+// Category pages
+import CategoriesPage from "@/pages/category/CategoriesPage";
+import CreateCategoryPage from "@/pages/category/CreateCategoryPage";
+import ViewCategoryPage from "@/pages/category/ViewCategoryPage";
+import EditCategoryPage from "@/pages/category/EditCategoryPage";
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated } = useAuthStore();
@@ -34,11 +50,12 @@ function App() {
   return (
     <>
       <Routes>
+        {/* Auth routes */}
         <Route path="/login" element={<LoginPage />} />
-        {/* Error page if not found the page */}
         <Route path="/error" element={<ErrorPage />} />
-        <Route path="*" element={<Navigate to="/error" />} />
+        <Route path="/logout" element={<LogoutPage />} />
 
+        {/* Home route */}
         <Route
           path="/"
           element={
@@ -47,6 +64,8 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* Users routes */}
         <Route
           path="/users"
           element={
@@ -56,6 +75,32 @@ function App() {
           }
         />
         <Route
+          path="/users/add"
+          element={
+            <PrivateRoute>
+              <CreateUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/users/:id/edit"
+          element={
+            <PrivateRoute>
+              <EditUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/users/:id/view"
+          element={
+            <PrivateRoute>
+              <ViewUserPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Posts routes */}
+        <Route
           path="/posts"
           element={
             <PrivateRoute>
@@ -64,6 +109,32 @@ function App() {
           }
         />
         <Route
+          path="/posts/add"
+          element={
+            <PrivateRoute>
+              <CreatePostPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/posts/:id/edit"
+          element={
+            <PrivateRoute>
+              <EditPostPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/posts/:id/view"
+          element={
+            <PrivateRoute>
+              <ViewPostPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Category routes */}
+        <Route
           path="/categories"
           element={
             <PrivateRoute>
@@ -71,15 +142,33 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/create-post"
+        {/* <Route
+          path="/categories/add"
           element={
             <PrivateRoute>
-              <CreatePost />
+              <CreateCategoryPage />
+            </PrivateRoute>
+          }
+        /> */}
+        <Route
+          path="/categories/:id/edit"
+          element={
+            <PrivateRoute>
+              <EditCategoryPage />
             </PrivateRoute>
           }
         />
-        <Route path="/logout" element={<LogoutPage />} />
+        <Route
+          path="/categories/:id/view"
+          element={
+            <PrivateRoute>
+              <ViewCategoryPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 404 route */}
+        <Route path="*" element={<Navigate to="/error" />} />
       </Routes>
       <Toaster richColors={true} position="top-right" />
     </>

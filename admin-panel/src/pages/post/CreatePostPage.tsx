@@ -5,7 +5,7 @@ import JoditEditor from "jodit-react";
 import { toast } from "sonner";
 import { MainLayout } from "@/layout/MainLayout";
 import { useAuthStore } from "@/store/authStore";
-import { useCreatePost } from "@/hooks/useCreatePost";
+import { useCreatePost } from "@/hooks/post/useCreatePost";
 
 const CreatePost: React.FC = () => {
   const { store } = useAuthStore();

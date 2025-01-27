@@ -1,42 +1,57 @@
-import { Paperclip, Users, Home, LogOut, List, CirclePlus } from "lucide-react";
-import { Link, useLocation } from "react-router-dom"; // Import useLocation hook
+import {
+  Paperclip,
+  Users,
+  Home,
+  LogOut,
+  List,
+  CirclePlus,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const Routes = () => {
-  const location = useLocation(); // Get the current location
+  const location = useLocation();
 
   return (
-    <div className="space-y-1 ">
+    <div className="space-y-1">
       <Route
         Icon={Home}
-        selected={location.pathname === "/"} // Check if the current path is '/'
+        selected={location.pathname === "/"}
         title="Dashboard"
         to="/"
       />
       <Route
         Icon={Users}
-        selected={location.pathname === "/users"} // Check if the current path is '/users'
+        selected={location.pathname.startsWith("/users")}
         title="Users"
         to="/users"
+        children={[
+          { title: "List Users", to: "/users" },
+          { title: "Create User", to: "/users/add" },
+        ]}
       />
       <Route
         Icon={List}
-        selected={location.pathname === "/categories"}
+        selected={location.pathname.startsWith("/categories")}
         title="Categories"
         to="/categories"
+        children={[
+          { title: "List Categories", to: "/categories" },
+          // { title: "Create Category", to: "/categories/add" },
+        ]}
       />
       <Route
         Icon={Paperclip}
-        selected={location.pathname === "/posts"} // Check if the current path is '/posts'
+        selected={location.pathname.startsWith("/posts")}
         title="Posts"
         to="/posts"
+        children={[
+          { title: "List Posts", to: "/posts" },
+          { title: "Create Post", to: "/posts/add" },
+        ]}
       />
-      <Route
-        Icon={CirclePlus}
-        selected={location.pathname === "/create-post"}
-        title="Add Post"
-        to="/create-post"
-      />
-
       <Route
         Icon={LogOut}
         selected={location.pathname === "/logout"}
@@ -52,25 +67,74 @@ const Route = ({
   Icon,
   title,
   to,
+  children,
 }: {
   selected: boolean;
   Icon: any;
   title: string;
-  to: string; // Route path to navigate to
+  to: string;
+  children?: { title: string; to: string }[];
 }) => {
+  const location = useLocation();
+
+  // Initialize the submenu state based on whether the current path matches any submenu route
+  const [isSidebarSubmenuOpen, setIsSidebarSubmenuOpen] = useState(
+    children?.some((child) => location.pathname === child.to) || false
+  );
+
+  // Update isSidebarSubmenuOpen if the location changes and a child route matches the current path
+  useEffect(() => {
+    if (children) {
+      setIsSidebarSubmenuOpen(children.some((child) => location.pathname === child.to));
+    }
+  }, [location.pathname, children]);
+
   return (
-    <Link to={to} className="w-full">
-      <button
-        className={`flex items-center justify-start gap-3 w-full rounded px-2 py-1.5 text-sm transition-[box-shadow,_background-color,_color] ${
-          selected
-            ? "bg-white text-stone-950 shadow"
-            : "hover:bg-stone-200 bg-transparent text-stone-500 shadow-none"
-        }`}
-      >
-        <Icon className={selected ? "text-violet-500" : ""} />
-        <span>{title}</span>
-      </button>
-    </Link>
+    <div>
+      <Link to={to} className="w-full">
+        <button
+          className={`flex items-center justify-between w-full rounded px-2 py-1.5 text-sm transition-[box-shadow,_background-color,_color] duration-200 ${selected
+              ? "bg-white text-stone-950 shadow"
+              : "hover:bg-stone-200 bg-transparent text-stone-500 shadow-none"
+            }`}
+          onClick={(e) => {
+            if (children) {
+              e.preventDefault(); // Prevent navigation if submenu exists
+              setIsSidebarSubmenuOpen(!isSidebarSubmenuOpen);
+            }
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <Icon className={selected ? "text-primary" : ""} />
+            <span>{title}</span>
+          </div>
+          {children && (
+            <span>
+              {isSidebarSubmenuOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </span>
+          )}
+        </button>
+      </Link>
+
+      {/* Submenu */}
+      {isSidebarSubmenuOpen && children && (
+        <div className="pl-6 space-y-1 mt-1">
+          {children.map((child) => (
+            <Link to={child.to} key={child.to}>
+              <button
+                className={`flex items-center justify-start gap-3 w-full rounded px-2 py-1.5 text-sm transition-colors ${location.pathname === child.to
+                    ? "bg-primary/50 text-gray-800"
+                    : "hover:bg-stone-200 text-stone-500"
+                  }`}
+              >
+                <CirclePlus size={16} />
+                <span>{child.title}</span>
+              </button>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 

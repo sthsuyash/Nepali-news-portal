@@ -8,7 +8,7 @@ import { fetchCategories } from "@/services/categoriesService";
  * @param token - Authorization token for the API.
  * @returns {Object} - { categories, loading, error }
  */
-export const useCategories = (page: number, limit: number) => {
+export const useCategories = (page: number = 1, limit: number = 10) => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
