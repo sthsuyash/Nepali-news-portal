@@ -32,6 +32,15 @@ export const getRecentPosts = async (req, res) => {
   try {
     const total = await prisma.post.count({});
     const posts = await prisma.post.findMany({
+      where: {
+        sentiment: {
+          // fetch positive or neutral sentiment posts
+          OR: [
+            { name: "POSITIVE" },
+            { name: "NEUTRAL" },
+          ],
+        },
+      },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: {
@@ -397,13 +406,6 @@ export const getPostById = async (req, res) => {
   }
 };
 
-cloudinary.v2.config({
-  cloud_name: CLOUD_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET,
-  secure: true,
-});
-
 /**
  * Creates a new post with image upload.
  * @param {Object} req - The Express request object containing the post data in body and image in file.
@@ -427,6 +429,13 @@ export const createPost = async (req, res) => {
 
     try {
       // Upload image to Cloudinary
+      cloudinary.v2.config({
+        cloud_name: CLOUD_NAME,
+        api_key: CLOUDINARY_API_KEY,
+        api_secret: CLOUDINARY_API_SECRET,
+        secure: true,
+      });
+      
       const result = await cloudinary.v2.uploader.upload_stream(
         {
           folder: "news_images", // Set a folder in Cloudinary to store images
@@ -483,6 +492,11 @@ export const createPost = async (req, res) => {
           const summaryData = await summaryResponse.json();
           // console.log(`Summary: ${summaryData.data.summary}`);
 
+          // find the category by label
+          const category = await prisma.category.findUnique({
+            where: { id: categoryData.data.label },
+          });
+
           // Create post in the database
           const post = await prisma.post.create({
             data: {
@@ -490,7 +504,7 @@ export const createPost = async (req, res) => {
               description,
               image: imageUrl, // Store the Cloudinary image URL
               category: {
-                connect: { id: categoryData.data.label },
+                connect: { id: category.id },
               },
               sentiment: {
                 connect: { id: sentiment.id },

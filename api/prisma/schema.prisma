@@ -105,8 +105,3 @@ model Bookmark {
 
   @@unique([userId, postId]) // Ensure unique bookmarks
 }
-
-enum PostStatus {
-  DRAFT
-  PUBLISHED
-}

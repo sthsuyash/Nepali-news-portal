@@ -120,7 +120,8 @@ const seedPosts = async () => {
                         },
                         sentiment: {
                             connect: { id: sentimentId.id }
-                        }
+                        },
+                        summary: faker.lorem.paragraph(),
                     },
                 });
 
