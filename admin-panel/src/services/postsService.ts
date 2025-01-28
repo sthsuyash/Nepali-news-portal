@@ -35,7 +35,7 @@ const createPost = async (postData: FormData) => {
                 "Content-Type": "multipart/form-data",
             },
         });
-        return response.data.data;
+        return response.data;
     } catch (error: any) {
         console.error("Error creating post:", error); // Log error details
         throw new Error(error.response?.data?.message || "Failed to create post.");

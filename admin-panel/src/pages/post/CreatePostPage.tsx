@@ -146,9 +146,8 @@ const CreatePost: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`px-3 py-[6px] rounded-sm text-white ${
-                isLoading ? "bg-gray-500" : "bg-purple-500 hover:bg-purple-600"
-              }`}
+              className={`px-3 py-[6px] rounded-sm text-white ${isLoading ? "bg-gray-500" : "bg-purple-500 hover:bg-purple-600"
+                }`}
             >
               {isLoading ? "Loading..." : "Add Post"}
             </button>

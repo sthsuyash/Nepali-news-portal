@@ -24,7 +24,9 @@ const seedComments = async () => {
         const posts = await prisma.post.findMany();
 
         // Fetch all users from the database
-        const users = await prisma.user.findMany();
+        const users = await prisma.user.findMany({
+            where: { role: "USER" },
+        })
 
         if (posts.length === 0 || users.length === 0) {
             console.log("No posts or users found to associate comments with.");

@@ -184,6 +184,7 @@ export const searchNews = async (req, res) => {
  */
 export const getRecommendedNews = async (req, res) => {
   const { postId } = req.params;
+  console.log("Post ID:", postId);
   try {
     const recommendedResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/recommend`, {
       method: 'POST',
@@ -194,7 +195,7 @@ export const getRecommendedNews = async (req, res) => {
     });
 
     const recommendedData = await recommendedResponse.json();
-    // console.log("Recommended news:", recommendedData.data.recommendations);
+    console.log("Recommended news:", recommendedData.data.recommendations);
     // this returns array with article_id and score
 
     const recommendedIds = recommendedData.data.recommendations.map(
@@ -515,10 +516,14 @@ export const createPost = async (req, res) => {
           const summaryData = await summaryResponse.json();
           // console.log(`Summary: ${summaryData.data.summary}`);
 
+          console.log("Category data:", categoryData.data.category.toLowerCase());
+          console.log("Category label:", categoryData.data.label);
           // find the category by label
-          const category = await prisma.category.findUnique({
-            where: { id: categoryData.data.label },
+          const category = await prisma.category.findFirst({
+            where: { label: categoryData.data.label },
           });
+
+          console.log("Category:", category);
 
           // Create post in the database
           const post = await prisma.post.create({
@@ -543,7 +548,7 @@ export const createPost = async (req, res) => {
           return res.status(201).json(createResponse(
             true,
             201,
-            "Post created successfully",
+            `Post created successfully with category: ${categoryData.data.category} and sentiment: ${sentimentData.data.sentiment}`,
             post
           ));
         }

@@ -1,6 +1,3 @@
--- CreateEnum
-CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'PUBLISHED');
-
 -- CreateTable
 CREATE TABLE "Role" (
     "id" SERIAL NOT NULL,
@@ -32,6 +29,7 @@ CREATE TABLE "Category" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "nepaliName" TEXT NOT NULL,
+    "label" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
