@@ -185,18 +185,41 @@ export const searchNews = async (req, res) => {
 export const getRecommendedNews = async (req, res) => {
   const { postId } = req.params;
   try {
-    const post = await prisma.post.findUnique({ where: { id: postId } });
-    if (!post) {
-      return res.status(404).json(createResponse(false, 404, "Post not found"));
-    }
+    const recommendedResponse = await fetch(`${NEWS_ALGORITHM_API_URL}/recommend`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ article_id: postId })
+    });
+
+    const recommendedData = await recommendedResponse.json();
+    // console.log("Recommended news:", recommendedData.data.recommendations);
+    // this returns array with article_id and score
+
+    const recommendedIds = recommendedData.data.recommendations.map(
+      (recommendation) => recommendation.article_id
+    );
 
     const relatedPosts = await prisma.post.findMany({
       where: {
-        id: { not: postId },
-        categoryId: post.categoryId,
+        id: {
+          in: recommendedIds,
+        },
       },
-      take: 4,
-      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        image: true,
+        createdAt: true,
+        category: {
+          select: {
+            name: true,
+            nepaliName: true,
+          },
+        },
+      },
     });
 
     return res
@@ -435,7 +458,7 @@ export const createPost = async (req, res) => {
         api_secret: CLOUDINARY_API_SECRET,
         secure: true,
       });
-      
+
       const result = await cloudinary.v2.uploader.upload_stream(
         {
           folder: "news_images", // Set a folder in Cloudinary to store images

@@ -11,7 +11,6 @@ import { api } from "@/config/index";
         const response = await api.get(`/posts/admin`, {
             params: { page, limit }
         });
-        console.log("Full response:", response.data.data);
         return {
             posts: response.data.data.posts || [], // Array of posts
             total: response.data.data.pagination?.total || 0, // Total number of posts

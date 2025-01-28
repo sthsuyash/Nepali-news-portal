@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
 import { FaEye, FaTrash, FaEdit } from "react-icons/fa";
 import { MainLayout } from "@/layout/MainLayout";
-import { useAuthStore } from "@/store/authStore";
 import { usePosts } from "@/hooks/post/usePosts";
 import { useCategories } from "@/hooks/category/useCategories";
 import { useState } from "react";
+import { changeDate } from "@/helpers/changeDate";
 
 const PostsPage: React.FC = () => {
-  const { post } = useAuthStore(); // Access the token
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -87,10 +86,9 @@ const PostsPage: React.FC = () => {
           <table className="w-full text-sm text-left text-slate-600">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
-                <th className="px-7 py-3">No</th>
+                <th className="px-7 py-3">S.N.</th>
                 <th className="px-7 py-3">Title</th>
                 <th className="px-7 py-3">Category</th>
-                <th className="px-7 py-3">Nepali Name</th>
                 <th className="px-7 py-3">Date</th>
                 <th className="px-7 py-3">Actions</th>
               </tr>
@@ -99,17 +97,11 @@ const PostsPage: React.FC = () => {
               {filteredPosts.map((post, index) => (
                 <tr key={post.id} className="bg-white border-b">
                   <td className="px-6 py-4">{index + 1}</td>
-                  <td className="px-6 py-4">{post.title}</td>
-                  <td className="px-6 py-4">{post.category.name}</td>
-                  <td className="px-6 py-4">{post.category.nepaliName}</td>
                   <td className="px-6 py-4">
-                    {new Date(post.createdAt).toLocaleString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "numeric",
-                    })}
+                    {post.title.length > 50 ? `${post.title.substring(0, 100)}...` : post.title}
+                  </td>
+                  <td className="px-6 py-4">{post.category.name.toUpperCase()} ({post.category.nepaliName})</td>
+                  <td className="px-6 py-4">{changeDate(post.createdAt, true)}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-start items-center gap-x-4 text-white">
