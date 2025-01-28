@@ -1,3 +1,4 @@
+
 import { api } from "@/config/index";
 
 /**
@@ -19,4 +20,34 @@ import { api } from "@/config/index";
     }
 };
 
-export { fetchUsers };
+const fetchUser = async (id: number) => {
+    try {
+        const response = await api.get(`/users/admin/${id}`);
+        return response.data.data;
+    } catch (error: any) {
+        console.error("Error fetching user:", error); // Log error details
+        throw new Error("Failed to fetch user: " + error.response?.data?.message || error.message);
+    }
+}
+
+const deleteUser = async (id: number) => {
+    try {
+        const response = await api.delete(`/users/admin/${id}`);
+        return response.data.data;
+    } catch (error: any) {
+        console.error("Error deleting user:", error); // Log error details
+        throw new Error("Failed to delete user: " + error.response?.data?.message || error.message);
+    }
+};
+
+const updateUser = async (id: number, data: any) => {
+    try {
+        const response = await api.put(`/users/admin/${id}`, data);
+        return response.data.data;
+    } catch (error: any) {
+        console.error("Error updating user:", error); // Log error details
+        throw new Error("Failed to update user: " + error.response?.data?.message || error.message);
+    }
+};
+
+export { fetchUsers, deleteUser , updateUser, fetchUser };
