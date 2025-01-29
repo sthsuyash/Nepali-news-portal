@@ -6,7 +6,8 @@ import { api } from "@/config/index";
  * @param limit - Number of users to fetch per page.
  * @param token - Authorization token for the API.
  * @returns {Promise} - A promise that resolves to the users data.
- */const fetchCategories = async (page: number, limit: number) => {
+ */
+const fetchCategories = async (page: number, limit: number) => {
     try {
         const response = await api.get(`/category/admin`, {
             params: { page, limit }

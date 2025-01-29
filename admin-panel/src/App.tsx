@@ -17,20 +17,15 @@ import LogoutPage from "@/pages/auth/LogoutPage";
 
 // User pages
 import UsersPage from "@/pages/user/UsersPage";
-import CreateUserPage from "@/pages/user/CreateUserPage";
-import ViewUserPage from "@/pages/user/ViewUserPage";
 import EditUserPage from "@/pages/user/EditUserPage";
 
 // Post pages
 import PostsPage from "@/pages/post/PostsPage";
 import CreatePostPage from "@/pages/post/CreatePostPage";
-import ViewPostPage from "@/pages/post/ViewPostPage";
 import EditPostPage from "@/pages/post/EditPostPage";
 
 // Category pages
 import CategoriesPage from "@/pages/category/CategoriesPage";
-import CreateCategoryPage from "@/pages/category/CreateCategoryPage";
-import ViewCategoryPage from "@/pages/category/ViewCategoryPage";
 import EditCategoryPage from "@/pages/category/EditCategoryPage";
 
 function App() {
@@ -74,30 +69,23 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/users/add"
           element={
             <PrivateRoute>
               <CreateUserPage />
             </PrivateRoute>
           }
-        />
+        /> */}
         <Route
-          path="/users/:id/edit"
+          path="/users/:id"
           element={
             <PrivateRoute>
               <EditUserPage />
             </PrivateRoute>
           }
         />
-        <Route
-          path="/users/:id/view"
-          element={
-            <PrivateRoute>
-              <ViewUserPage />
-            </PrivateRoute>
-          }
-        />
+        
 
         {/* Posts routes */}
         <Route
@@ -117,21 +105,14 @@ function App() {
           }
         />
         <Route
-          path="/posts/:id/edit"
+          path="/posts/:id"
           element={
             <PrivateRoute>
               <EditPostPage />
             </PrivateRoute>
           }
         />
-        <Route
-          path="/posts/:id/view"
-          element={
-            <PrivateRoute>
-              <ViewPostPage />
-            </PrivateRoute>
-          }
-        />
+        
 
         {/* Category routes */}
         <Route
@@ -142,30 +123,16 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route
-          path="/categories/add"
-          element={
-            <PrivateRoute>
-              <CreateCategoryPage />
-            </PrivateRoute>
-          }
-        /> */}
+
         <Route
-          path="/categories/:id/edit"
+          path="/categories/:id"
           element={
             <PrivateRoute>
               <EditCategoryPage />
             </PrivateRoute>
           }
         />
-        <Route
-          path="/categories/:id/view"
-          element={
-            <PrivateRoute>
-              <ViewCategoryPage />
-            </PrivateRoute>
-          }
-        />
+        
 
         {/* 404 route */}
         <Route path="*" element={<Navigate to="/error" />} />

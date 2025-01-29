@@ -3,7 +3,6 @@ import prisma from "../../config/prisma.js";
 
 const seedUsers = async () => {
     const users = [
-        { email: "admin@example.com", password: "adminpassword", name: "Admin User", role: "ADMIN" },
         { email: "user1@example.com", password: "password123", name: "User One", role: "USER" },
         { email: "user2@example.com", password: "password123", name: "User Two", role: "USER" },
     ];

@@ -5,6 +5,9 @@ import { usePosts } from "@/hooks/post/usePosts";
 import { useCategories } from "@/hooks/category/useCategories";
 import { useState } from "react";
 import { changeDate } from "@/helpers/changeDate";
+import { ConfirmModal } from "@/components/customUI/ConfirmModal";
+import { toastWithTime } from "@/components/customUI/Toaster";
+import { api } from "@/config";
 
 const PostsPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -13,6 +16,9 @@ const PostsPage: React.FC = () => {
   const { posts, totalPosts, error: postsError } = usePosts(page, limit);
   const { categories, error: categoriesError, isLoading } = useCategories(); // Fetch categories from API
   const totalPages = Math.ceil(totalPosts / limit);
+
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   // Search and Category Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,6 +44,24 @@ const PostsPage: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Delete Post
+  const handleDelete = (postId: string) => {
+    if (selectedPostId) {
+      try {
+        const response = api.delete(`/posts/admin/${selectedPostId}`);
+        window.location.reload();
+        toastWithTime("success", response.data.message || "Post deleted successfully");
+      }
+      catch (error) {
+        toastWithTime("error", error?.data.message || "Failed to delete post");
+      }
+      finally {
+        setModalOpen(false);
+        setSelectedPostId(null);
+      }
+    };
+  };
+
   return (
     <MainLayout>
       <div className="bg-white rounded-md">
@@ -45,7 +69,7 @@ const PostsPage: React.FC = () => {
           <h2 className="text-xl font-medium">Posts</h2>
           <Link
             className="px-3 py-[6px] bg-primary rounded-sm text-white hover:bg-primary/80 transition-all duration-200"
-            to="/create-post"
+            to="/posts/add"
           >
             Create Post
           </Link>
@@ -107,22 +131,19 @@ const PostsPage: React.FC = () => {
                     <div className="flex justify-start items-center gap-x-4 text-white">
                       <Link
                         to={`/posts/${post.id}`}
-                        className="p-[6px] bg-green-500 rounded hover:shadow-lg hover:shadow-green-500/50"
-                      >
-                        <FaEye />
-                      </Link>
-                      <Link
-                        to={`/posts/edit/${post.id}`}
                         className="p-[6px] bg-blue-500 text-white rounded hover:shadow-lg hover:shadow-blue-500/50"
                       >
                         <FaEdit />
                       </Link>
-                      <Link
-                        to={`/posts/delete/${post.id}`}
+                      <button
                         className="p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50"
+                        onClick={() => {
+                          setSelectedPostId(post.id)
+                          setModalOpen(true);
+                        }}
                       >
                         <FaTrash />
-                      </Link>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -159,6 +180,12 @@ const PostsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this post?" />
     </MainLayout>
   );
 };

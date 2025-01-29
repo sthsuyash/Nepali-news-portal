@@ -46,7 +46,7 @@ const LoginPage: React.FC = () => {
             >
                 <div className="p-10">
                     <h2 className="text-4xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-rose-500">
-                        स्वागतम्
+                        Welcome Back!
                     </h2>
 
                     <form onSubmit={handleLogin}>
@@ -67,13 +67,6 @@ const LoginPage: React.FC = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-
-                        {/* Forgot Password Link */}
-                        <div className="flex justify-between items-center mb-6">
-                            <Link to="/forgot-password" className="text-sm text-red-500 hover:underline transition duration-200">
-                                पासवर्ड बिर्सनु भयो?
-                            </Link>
-                        </div>
 
                         {/* Login Button */}
                         <motion.button

@@ -68,7 +68,7 @@ const CategoryPage: React.FC = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-x-4">
                                                 <Link
-                                                    to={`/categories/${category.id}/view`}
+                                                    to={`/categories/${category.id}`}
                                                     className="p-2 bg-green-500 text-white rounded hover:shadow-lg hover:shadow-green-500/50"
                                                 >
                                                     <FaEye />

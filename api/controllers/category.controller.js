@@ -59,10 +59,15 @@ export const getTopPostsByCategory = async (req, res) => {
     try {
         const categoryNews = await prisma.category.findUnique({
             where: {
-                name: categoryName
+                name: categoryName,
             },
             include: {
                 posts: {
+                    where: {
+                        sentiment: {
+                            NOT: { name: "NEGATIVE" }
+                        }
+                    },
                     orderBy: {
                         [orderBy]: order
                     },
@@ -92,7 +97,7 @@ export const getPostsByCategory = async (req, res) => {
     const { categoryName } = req.params;
     const {
         page = 1,
-        limit = 9,
+        limit = 20,
         orderBy = "createdAt",
         order = "desc"
     } = req.query;
@@ -100,15 +105,23 @@ export const getPostsByCategory = async (req, res) => {
     try {
         const categoryNews = await prisma.category.findUnique({
             where: {
-                name: categoryName
+                name: categoryName,
             },
             include: {
                 posts: {
+                    where: {
+                        sentiment: {
+                            OR: [
+                                { name: "POSITIVE" },
+                                { name: "NEUTRAL" }
+                            ]
+                        }
+                    },
                     orderBy: {
                         [orderBy]: order
                     },
                     take: limit,
-                    skip: (page - 1) * limit
+                    skip: (page - 1) * limit,
                 }
             }
         });

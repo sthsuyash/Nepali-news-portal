@@ -12,7 +12,6 @@ import { api } from "@/config/index";
         const response = await api.get(`/users/admin`, {
             params: { page, limit }
         });
-        console.log("Full response:", response.data.data);
         return response.data.data; // Corrected path to fetch users
     } catch (error: any) {
         console.error("Error fetching users:", error); // Log error details
@@ -20,6 +19,11 @@ import { api } from "@/config/index";
     }
 };
 
+/**
+ * Fetch a single user by ID.
+ * @param id - The ID of the user to fetch.
+ * @returns {Promise} - A promise that resolves to the user data.
+ */
 const fetchUser = async (id: number) => {
     try {
         const response = await api.get(`/users/admin/${id}`);
@@ -30,24 +34,4 @@ const fetchUser = async (id: number) => {
     }
 }
 
-const deleteUser = async (id: number) => {
-    try {
-        const response = await api.delete(`/users/admin/${id}`);
-        return response.data.data;
-    } catch (error: any) {
-        console.error("Error deleting user:", error); // Log error details
-        throw new Error("Failed to delete user: " + error.response?.data?.message || error.message);
-    }
-};
-
-const updateUser = async (id: number, data: any) => {
-    try {
-        const response = await api.put(`/users/admin/${id}`, data);
-        return response.data.data;
-    } catch (error: any) {
-        console.error("Error updating user:", error); // Log error details
-        throw new Error("Failed to update user: " + error.response?.data?.message || error.message);
-    }
-};
-
-export { fetchUsers, deleteUser , updateUser, fetchUser };
+export { fetchUsers, fetchUser };

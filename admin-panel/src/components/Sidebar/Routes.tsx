@@ -29,7 +29,6 @@ const Routes = () => {
         to="/users"
         children={[
           { title: "List Users", to: "/users" },
-          { title: "Create User", to: "/users/add" },
         ]}
       />
       <Route
@@ -39,7 +38,6 @@ const Routes = () => {
         to="/categories"
         children={[
           { title: "List Categories", to: "/categories" },
-          // { title: "Create Category", to: "/categories/add" },
         ]}
       />
       <Route
@@ -68,21 +66,20 @@ const Route = ({
   title,
   to,
   children,
+  isLogout = false,
 }: {
   selected: boolean;
   Icon: any;
   title: string;
   to: string;
   children?: { title: string; to: string }[];
+  isLogout?: boolean;
 }) => {
   const location = useLocation();
-
-  // Initialize the submenu state based on whether the current path matches any submenu route
   const [isSidebarSubmenuOpen, setIsSidebarSubmenuOpen] = useState(
     children?.some((child) => location.pathname === child.to) || false
   );
 
-  // Update isSidebarSubmenuOpen if the location changes and a child route matches the current path
   useEffect(() => {
     if (children) {
       setIsSidebarSubmenuOpen(children.some((child) => location.pathname === child.to));
@@ -93,13 +90,13 @@ const Route = ({
     <div>
       <Link to={to} className="w-full">
         <button
-          className={`flex items-center justify-between w-full rounded px-2 py-1.5 text-sm transition-[box-shadow,_background-color,_color] duration-200 ${selected
-              ? "bg-white text-stone-950 shadow"
-              : "hover:bg-stone-200 bg-transparent text-stone-500 shadow-none"
+          className={`z-50 flex items-center justify-between w-full rounded px-2 py-1.5 text-sm transition-[box-shadow,_background-color,_color] duration-200 ${selected
+            ? "bg-white text-stone-950 shadow"
+            : "hover:bg-stone-200 bg-transparent text-stone-500 shadow-none"
             }`}
           onClick={(e) => {
             if (children) {
-              e.preventDefault(); // Prevent navigation if submenu exists
+              e.preventDefault();
               setIsSidebarSubmenuOpen(!isSidebarSubmenuOpen);
             }
           }}
@@ -116,15 +113,14 @@ const Route = ({
         </button>
       </Link>
 
-      {/* Submenu */}
       {isSidebarSubmenuOpen && children && (
         <div className="pl-6 space-y-1 mt-1">
           {children.map((child) => (
             <Link to={child.to} key={child.to}>
               <button
                 className={`flex items-center justify-start gap-3 w-full rounded px-2 py-1.5 text-sm transition-colors ${location.pathname === child.to
-                    ? "bg-primary/50 text-gray-800"
-                    : "hover:bg-stone-200 text-stone-500"
+                  ? "bg-primary/50 text-gray-800"
+                  : "hover:bg-stone-200 text-stone-500"
                   }`}
               >
                 <CirclePlus size={16} />

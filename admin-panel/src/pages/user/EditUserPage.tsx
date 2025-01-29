@@ -1,18 +1,15 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { MainLayout } from "@/layout/MainLayout";
-import { fetchUser, updateUser } from "@/services/usersService";
+import { fetchUser } from "@/services/usersService";
+import { toastWithTime } from "@/components/customUI/Toaster";
+import { api } from "@/config";
 
 const EditUserPage = () => {
   const { id } = useParams(); // Access the user ID from the route
   const navigate = useNavigate();
 
-  const [userDetails, setUserDetails] = useState({
-    name: "",
-    email: "",
-    role: "",
-    isVerified: false,
-  });
+  const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -45,12 +42,13 @@ const EditUserPage = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await updateUser(id, userDetails); // Call the updateUser function from the service
-      alert("User details updated successfully!");
+      console.log("User details to save:", userDetails);
+      const response = await api.put(`/users/admin/${id}`, userDetails);
+      toastWithTime("success", response.data.data.message || "User details updated successfully");
       navigate("/users"); // Redirect to the users list after saving
     } catch (err) {
       console.error(err);
-      alert("Failed to update user details.");
+      toastWithTime("error", "Failed to update user details.");
     }
   };
 
@@ -92,15 +90,9 @@ const EditUserPage = () => {
         </p>
 
         <form onSubmit={handleSave}>
+          {/* Name Field */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label
-              htmlFor="name"
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "bold",
-              }}
-            >
+            <label htmlFor="name" style={{ fontWeight: "bold" }}>
               Name:
             </label>
             <input
@@ -119,15 +111,9 @@ const EditUserPage = () => {
             />
           </div>
 
+          {/* Email Field */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label
-              htmlFor="email"
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "bold",
-              }}
-            >
+            <label htmlFor="email" style={{ fontWeight: "bold" }}>
               Email:
             </label>
             <input
@@ -146,22 +132,41 @@ const EditUserPage = () => {
             />
           </div>
 
+          {/* Phone Field */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label
-              htmlFor="role"
+            <label htmlFor="phone" style={{ fontWeight: "bold" }}>
+              Phone:
+            </label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              value={userDetails.phone || ""}
+              onChange={handleChange}
               style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "bold",
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
               }}
-            >
+            />
+          </div>
+
+          {/* Role Field */}
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label htmlFor="role" style={{ fontWeight: "bold" }}>
               Role:
             </label>
             <select
               id="role"
               name="role"
-              value={userDetails.role}
-              onChange={handleChange}
+              value={userDetails.role.name}
+              onChange={(e) =>
+                setUserDetails((prev) => ({
+                  ...prev,
+                  role: { name: e.target.value },
+                }))
+              }
               style={{
                 width: "100%",
                 padding: "0.75rem",
@@ -170,22 +175,14 @@ const EditUserPage = () => {
               }}
               required
             >
-              <option value="">Select Role</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-              <option value="moderator">Moderator</option>
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
             </select>
           </div>
 
+          {/* Verified Field */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label
-              htmlFor="isVerified"
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "bold",
-              }}
-            >
+            <label htmlFor="isVerified" style={{ fontWeight: "bold" }}>
               Verified:
             </label>
             <input
@@ -201,6 +198,7 @@ const EditUserPage = () => {
             />
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             style={{
@@ -212,10 +210,7 @@ const EditUserPage = () => {
               borderRadius: "4px",
               fontWeight: "bold",
               cursor: "pointer",
-              transition: "background-color 0.3s ease",
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#0056b3")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#007BFF")}
           >
             Save Changes
           </button>

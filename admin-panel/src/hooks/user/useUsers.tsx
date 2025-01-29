@@ -12,6 +12,7 @@ export const useUsers = (page: number, limit: number) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -19,6 +20,7 @@ export const useUsers = (page: number, limit: number) => {
                 setLoading(true);
                 setError(null);
                 const data = await fetchUsers(page, limit);
+                setTotalPages(data.pagination.totalPages);
                 setUsers(data.users);
             } catch (err: any) {
                 setError(err.message || "An error occurred while fetching users");
@@ -30,6 +32,6 @@ export const useUsers = (page: number, limit: number) => {
         fetchData();
     }, [page, limit]);
 
-    return { users, loading, error };
+    return { users, totalPages, loading, error };
 };
 

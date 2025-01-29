@@ -394,6 +394,24 @@ export const updateUserDetailsById = async (req, res) => {
     const { userId } = req.params;
     const data = req.body;
 
+    if (data.role) {
+        const roleRecord = await prisma.role.findUnique({
+            where: { name: data.role.name },
+        });
+
+        if (!roleRecord) {
+            return res.status(400).json(createResponse(false, 400, "Role does not exist"));
+        }
+
+        data.roleId = roleRecord.id;
+        delete data.role;
+    }
+
+    if (data._count) {
+        // remove the _count object from the data
+        delete data._count;
+    }
+
     try {
         const existingUser = await prisma.user.findUnique({
             where: {

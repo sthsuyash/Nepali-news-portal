@@ -34,11 +34,9 @@ export const getRecentPosts = async (req, res) => {
     const posts = await prisma.post.findMany({
       where: {
         sentiment: {
-          // fetch positive or neutral sentiment posts
-          OR: [
-            { name: "POSITIVE" },
-            { name: "NEUTRAL" },
-          ],
+          NOT: {
+            name: "NEGATIVE",
+          },
         },
       },
       skip: (page - 1) * limit,
@@ -93,7 +91,7 @@ export const searchNews = async (req, res) => {
 
   // Ensure page and limit are integers and apply a maximum limit
   page = parseInt(page);
-  limit = Math.min(parseInt(limit), 10); // Limit the number of items per request to 100
+  limit = Math.max(parseInt(limit), 10);
 
   // Validate the search term `q`
   if (!q || q.trim().length === 0) {
@@ -116,7 +114,17 @@ export const searchNews = async (req, res) => {
       where: {
         OR: [
           { title: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } }
+        ],
+        AND: [
+          // sentiment must not be negative
+          {
+            sentiment: {
+              NOT: {
+                name: "NEGATIVE",
+              },
+            },
+          },
         ],
       },
     });
@@ -126,7 +134,16 @@ export const searchNews = async (req, res) => {
       where: {
         OR: [
           { title: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } }
+        ],
+        AND: [
+          {
+            sentiment: {
+              NOT: {
+                name: "NEGATIVE",
+              },
+            },
+          },
         ],
       },
       skip: (page - 1) * limit, // Skip the posts based on current page
@@ -251,7 +268,15 @@ export const getPostBySlug = async (req, res) => {
   const { slug } = req.params;
   try {
     const post = await prisma.post.update({
-      where: { slug },
+      // where condition to find the post by slug and must not be negative sentiment
+      where: {
+        slug,
+        sentiment: {
+          NOT: {
+            name: "NEGATIVE",
+          },
+        },
+      },
       data: { visitCount: { increment: 1 } },
       include: {
         category: true,
@@ -292,6 +317,14 @@ export const getPopularNews = async (req, res) => {
 
   try {
     const total = await prisma.post.count({
+      // Count posts with positive or neutral sentiment
+      where: {
+        sentiment: {
+          NOT: {
+            name: "NEGATIVE",
+          },
+        },
+      },
     });
 
     const posts = await prisma.post.findMany({
@@ -299,6 +332,13 @@ export const getPopularNews = async (req, res) => {
       take: limit,
       orderBy: {
         [sortBy]: order,
+      },
+      where: {
+        sentiment: {
+          NOT: {
+            name: "NEGATIVE",
+          },
+        },
       },
     });
 
@@ -361,6 +401,11 @@ export const getAllPosts = async (req, res) => {
           select: {
             name: true,
             nepaliName: true,
+          },
+        },
+        sentiment: {
+          select: {
+            name: true,
           },
         },
       },
@@ -525,6 +570,12 @@ export const createPost = async (req, res) => {
 
           console.log("Category:", category);
 
+          // create a random date from range today to 10 days ago
+          // TODO: remove this and use the actual date from the news
+          const randomDate = new Date(
+            new Date() - Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000
+          );
+
           // Create post in the database
           const post = await prisma.post.create({
             data: {
@@ -541,7 +592,8 @@ export const createPost = async (req, res) => {
               slug: title.toLowerCase().replace(/ /g, "-"),
               user: {
                 connect: { id: req.userId },
-              }
+              },
+              createdAt: randomDate,
             },
           });
 
@@ -571,6 +623,20 @@ export const createPost = async (req, res) => {
 export const updatePostById = async (req, res) => {
   const { postId } = req.params;
   const data = req.body;
+
+  if (data.categoryId) {
+    data.category = {
+      connect: { id: parseInt(data.categoryId) },
+    };
+    delete data.categoryId;
+  }
+
+  if (data.sentimentId) {
+    data.sentiment = {
+      connect: { id: parseInt(data.sentimentId) },
+    };
+    delete data.sentimentId;
+  }
 
   try {
     const post = await prisma.post.update({

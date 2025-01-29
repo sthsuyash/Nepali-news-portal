@@ -4,11 +4,9 @@ import { MdCloudUpload } from "react-icons/md";
 import JoditEditor from "jodit-react";
 import { toast } from "sonner";
 import { MainLayout } from "@/layout/MainLayout";
-import { useAuthStore } from "@/store/authStore";
 import { useCreatePost } from "@/hooks/post/useCreatePost";
 
 const CreatePost: React.FC = () => {
-  const { store } = useAuthStore();
   const editor = useRef<JoditEditor | null>(null);
 
   // State variables
@@ -62,14 +60,29 @@ const CreatePost: React.FC = () => {
     }
   };
 
+
+  const handleTitleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    const nepaliText = newValue.replace(/[^\u0900-\u097F\s]/g, ""); // Remove non-Nepali characters
+    setTitle(nepaliText);
+
+    // if (newValue !== nepaliText) {
+    //   toast.error("Only Nepali characters are allowed.");
+    // }
+  };
+
+
+
+
+
   return (
     <MainLayout>
       <div className="bg-white rounded-md">
         <div className="flex justify-between p-4">
           <h2 className="text-xl font-medium">Add Post</h2>
           <Link
-            className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
-            to="/dashboard/posts"
+            className="px-3 py-[6px] bg-primary rounded-sm text-white hover:bg-primary/60 transition-all duration-200"
+            to="/posts"
           >
             Posts
           </Link>
@@ -90,7 +103,7 @@ const CreatePost: React.FC = () => {
                 id="title"
                 name="title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={handleTitleInput}
                 placeholder="Enter title"
                 required
                 className="px-3 py-2 rounded-md border border-gray-300 focus:border-green-500"
@@ -136,7 +149,7 @@ const CreatePost: React.FC = () => {
               <JoditEditor
                 ref={editor}
                 value={description}
-                onBlur={(newContent) => setDescription(newContent)} // Explicitly set the new content
+                onBlur={(newContent) => setDescription(newContent)}
                 onChange={() => { }}
               />
 
